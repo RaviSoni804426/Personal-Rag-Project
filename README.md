@@ -1,5 +1,17 @@
 # DataMind - Intelligent Document Intelligence Platform
 
+---
+title: DataMind
+emoji: "🧠"
+colorFrom: "blue"
+colorTo: "cyan"
+sdk: docker
+sdk_version: "1.0"
+python_version: "3.11"
+app_file: datamind.main:app
+pinned: false
+---
+
 > Enterprise-grade semantic search and document analysis platform powered by AI embeddings and large language models.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
