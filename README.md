@@ -9,7 +9,8 @@ app_file: app.py
 pinned: false
 ---
 
-# DataMind - Intelligent Document Intelligence Platform
+<!-- # DataMind - Intelligent Document Intelligence Platform -->
+>
 > Enterprise-grade semantic search and document analysis platform powered by AI embeddings and large language models.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -29,30 +30,35 @@ DataMind is a production-ready platform designed to solve enterprise document in
 ## ✨ Key Features
 
 ### 🔍 Semantic Search
+
 - Advanced natural language understanding using Groq embeddings
 - Similarity-based document retrieval with configurable thresholds
 - Real-time search with millisecond response times
 - Support for multi-document context retrieval
 
 ### 💬 AI-Powered Chat
+
 - Conversational interface for document queries
 - Context-aware responses using retrieved documents
 - Optional LLM integration (OpenAI GPT-4) for intelligent synthesis
 - Conversation history tracking
 
 ### 📄 Document Management
+
 - Support for multiple formats: PDF, DOCX, TXT, MD, JSON, CSV
 - Automatic text extraction and preprocessing
 - Batch document ingestion for bulk operations
 - Document metadata and tagging system
 
 ### 📊 Analytics Dashboard
+
 - Real-time statistics on document collection
 - Search performance metrics
 - Document type distribution
 - Storage utilization insights
 
 ### 🔒 Enterprise Ready
+
 - Built with FastAPI for high performance
 - Comprehensive error handling and logging
 - Health checks and readiness probes
@@ -62,6 +68,7 @@ DataMind is a production-ready platform designed to solve enterprise document in
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - Groq API Key (get one free at [console.groq.com](https://console.groq.com))
 - OpenAI API Key (optional, for LLM features)
@@ -69,23 +76,27 @@ DataMind is a production-ready platform designed to solve enterprise document in
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/yourusername/datamind.git
 cd datamind
 ```
 
-2. **Create virtual environment**
+1. **Create virtual environment**
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. **Install dependencies**
+1. **Install dependencies**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Configure environment**
+1. **Configure environment**
+
 ```bash
 cp .env.example .env
 # Edit .env and add your API keys:
@@ -93,18 +104,21 @@ cp .env.example .env
 # - OPENAI_API_KEY (optional)
 ```
 
-5. **Run the application**
+1. **Run the application**
+
 ```bash
 uvicorn datamind.main:app --host 0.0.0.0 --port 8080
 ```
 
-6. **Access the UI**
+1. **Access the UI**
 Open your browser and navigate to `http://localhost:8080`
 
 ## 📖 Usage
 
 ### Web UI
+
 The intuitive web interface provides:
+
 - **Chat Tab**: Ask questions about your documents
 - **Search Tab**: Perform semantic searches
 - **Documents Tab**: Manage your document library
@@ -113,12 +127,14 @@ The intuitive web interface provides:
 ### API Endpoints
 
 #### Upload Documents
+
 ```bash
 curl -X POST http://localhost:8080/api/documents/upload \
   -F "files=@document.pdf"
 ```
 
 #### Semantic Search
+
 ```bash
 curl -X POST http://localhost:8080/api/documents/search \
   -H "Content-Type: application/json" \
@@ -129,6 +145,7 @@ curl -X POST http://localhost:8080/api/documents/search \
 ```
 
 #### Ask Questions
+
 ```bash
 curl -X POST http://localhost:8080/api/chat/ \
   -H "Content-Type: application/json" \
@@ -139,11 +156,13 @@ curl -X POST http://localhost:8080/api/chat/ \
 ```
 
 #### Get Statistics
+
 ```bash
 curl http://localhost:8080/api/documents/stats
 ```
 
 #### Health Check
+
 ```bash
 curl http://localhost:8080/api/health/
 ```
@@ -151,11 +170,13 @@ curl http://localhost:8080/api/health/
 ## 🐳 Docker Deployment
 
 ### Build Docker Image
+
 ```bash
 docker build -t datamind:latest .
 ```
 
 ### Run with Docker
+
 ```bash
 docker run -p 8080:8080 \
   -e GROQ_API_KEY="your_key" \
@@ -186,6 +207,7 @@ See [HUGGING_FACE_DEPLOY.md](HUGGING_FACE_DEPLOY.md) for detailed instructions.
 ## 📚 API Documentation
 
 Once running, access interactive API docs:
+
 - **Swagger UI**: `http://localhost:8080/api/docs`
 - **ReDoc**: `http://localhost:8080/api/redoc`
 
