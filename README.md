@@ -1,15 +1,14 @@
 # DataMind - Intelligent Document Intelligence Platform
-
 ---
 title: DataMind
 emoji: "🧠"
 colorFrom: "blue"
 colorTo: "cyan"
-sdk: docker
-sdk_version: "1.0"
+sdk: gradio
 python_version: "3.11"
-app_file: datamind.main:app
+app_file: app.py
 pinned: false
+---
 ---
 
 > Enterprise-grade semantic search and document analysis platform powered by AI embeddings and large language models.
