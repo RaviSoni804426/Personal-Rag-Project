@@ -3144,3 +3144,104 @@ ck your plan and billing details. For more information on this error, read the d
 2026-05-30 16:52:45 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (2271.47ms)
 2026-05-30 16:52:45 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (3201.17ms)
 2026-05-30 16:52:45 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (1564.19ms)
+2026-05-30 16:53:40 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:53:40 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:53:40 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:53:40 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:53:41 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:53:41 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:53:41 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:53:41 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:53:41 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:53:41 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:53:42 - datamind.core.llm - WARNING - [llm.py:88] - Openai LLM request failed with 429: {
+    "error": {
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
+        "type": "insufficient_quota",
+        "param": null,
+        
+2026-05-30 16:53:42 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (2345.08ms)
+2026-05-30 16:53:42 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:53:42 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:53:43 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:53:43 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:53:43 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:53:44 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (3616.26ms)
+2026-05-30 16:53:44 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:53:44 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:53:44 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:53:44 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:53:45 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:53:45 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:53:45 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:53:46 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:53:46 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:53:46 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:53:46 - datamind.core.llm - WARNING - [llm.py:88] - Openai LLM request failed with 429: {
+    "error": {
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
+        "type": "insufficient_quota",
+        "param": null,
+        
+2026-05-30 16:53:47 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (4348.04ms)
+2026-05-30 16:53:47 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (2293.58ms)
+2026-05-30 16:53:47 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (3375.02ms)
+2026-05-30 16:54:40 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:54:40 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:54:40 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:54:40 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:54:42 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:54:42 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:54:42 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:54:42 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:54:42 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:54:42 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:54:43 - datamind.core.llm - WARNING - [llm.py:88] - Openai LLM request failed with 429: {
+    "error": {
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
+        "type": "insufficient_quota",
+        "param": null,
+        
+2026-05-30 16:54:43 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:54:43 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:54:44 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (3217.49ms)
+2026-05-30 16:54:44 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:54:44 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:54:44 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:54:44 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:54:44 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:54:44 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:54:44 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:54:44 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:54:45 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (4331.37ms)
+2026-05-30 16:54:45 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (1868.56ms)
+2026-05-30 16:54:45 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:54:45 - datamind.core.embeddings - INFO - [embeddings.py:61] - Generating embeddings for 1 texts
+2026-05-30 16:54:45 - datamind.core.llm - WARNING - [llm.py:88] - Openai LLM request failed with 429: {
+    "error": {
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
+        "type": "insufficient_quota",
+        "param": null,
+        
+2026-05-30 16:54:46 - datamind.core.embeddings - ERROR - [embeddings.py:130] - Groq API request failed: 404 Client Error: Not Found for url: https://api.groq.com/openai/v1/embeddings
+2026-05-30 16:54:46 - datamind.core.embeddings - WARNING - [embeddings.py:132] - Falling back to local embeddings after Groq failure
+2026-05-30 16:54:46 - datamind.core.embeddings - INFO - [embeddings.py:76] - Successfully generated 1 embeddings
+2026-05-30 16:54:46 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (2763.96ms)
+2026-05-30 16:54:47 - datamind - INFO - [main.py:125] - GET /api/health/ - 200 (2033.95ms)
+2026-05-30 16:54:57 - datamind - INFO - [main.py:38] - ============================================================
+2026-05-30 16:54:57 - datamind - INFO - [main.py:39] - DataMind 1.0.0 starting up...
+2026-05-30 16:54:57 - datamind - INFO - [main.py:40] - Environment: PRODUCTION
+2026-05-30 16:54:57 - datamind - INFO - [main.py:41] - Database: ./data/datamind.db
+2026-05-30 16:54:57 - datamind - INFO - [main.py:42] - Model: embed-1
+2026-05-30 16:54:57 - datamind.storage.vector_store - INFO - [vector_store.py:80] - Database initialized successfully
+2026-05-30 16:54:57 - datamind.core.embeddings - INFO - [embeddings.py:41] - EmbeddingsService initialized with model: embed-1
+2026-05-30 16:54:57 - datamind.core.llm - INFO - [llm.py:30] - LLMService initialized with OpenAI model: gpt-4o-mini and Groq model: llama-3.1-8b-instant
+2026-05-30 16:54:57 - datamind - INFO - [main.py:60] - [OK] Vector store and document service initialized
+2026-05-30 16:54:57 - datamind - INFO - [main.py:68] - [OK] Embeddings service initialized
+2026-05-30 16:54:57 - datamind - INFO - [main.py:75] - [OK] LLM service initialized
+2026-05-30 16:54:57 - datamind - INFO - [main.py:81] - ============================================================
+2026-05-30 16:54:57 - datamind - INFO - [main.py:82] - Application ready to serve requests
+2026-05-30 16:54:57 - datamind - INFO - [main.py:83] - ============================================================
+2026-05-30 16:54:57 - datamind - INFO - [main.py:88] - ============================================================
+2026-05-30 16:54:57 - datamind - INFO - [main.py:89] - DataMind shutting down...
+2026-05-30 16:54:57 - datamind - INFO - [main.py:90] - ============================================================
