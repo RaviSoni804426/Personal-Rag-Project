@@ -1,41 +1,8 @@
-# Core Dependencies
-# Use FastAPI version compatible with Gradio 6.15.2
-fastapi==0.115.2
-uvicorn[standard]==0.24.0
+-- Minimal requirements for Hugging Face Spaces (Gradio runtime)
+# Keep the install lean to reduce build time and avoid native build failures
 python-dotenv==1.0.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
-
-# HTTP & API
 requests==2.31.0
-httpx==0.25.2
-
-# Data Processing
-numpy==1.24.3
-pandas==2.1.3
-
-# File Processing
 PyPDF2==3.0.1
 python-docx==0.8.11
-openpyxl==3.1.2
-
-# Database
-# sqlite3 is built into Python; no pip package required
-
-# Web UI
-# Gradio is installed by the Space build (gradio==6.15.2); remove older pinned version to avoid conflicts
-
-# Utilities
-# Use python-multipart version compatible with Gradio 6.15.2
 python-multipart==0.0.18
 aiofiles==23.2.1
-
-# Development
-pytest==7.4.3
-pytest-asyncio==0.21.1
-black==23.12.1
-isort==5.13.2
-flake8==6.1.0
-
-# Deployment
-gunicorn==21.2.0
