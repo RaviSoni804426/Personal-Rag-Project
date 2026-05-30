@@ -8,7 +8,8 @@ from rag_app import storage
 from rag_app.groq_client import embed_texts
 
 load_dotenv()
-DB_PATH = os.getenv("DB_PATH", "./data/memories.db")
+# Use a writable temp path by default on hosted runtimes (Hugging Face Spaces).
+DB_PATH = os.getenv("DB_PATH", "/tmp/memories.db")
 
 storage.init_db(DB_PATH)
 
