@@ -1,5 +1,6 @@
 # Core Dependencies
-fastapi==0.104.1
+# Use FastAPI version compatible with Gradio 6.15.2
+fastapi==0.115.2
 uvicorn[standard]==0.24.0
 python-dotenv==1.0.0
 pydantic==2.5.0
