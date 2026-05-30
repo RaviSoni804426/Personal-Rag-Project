@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataMind - Intelligent Document Intelligence Platform</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <h1>🧠 DataMind</h1>
+                <p class="subtitle">Intelligent Document Intelligence Platform</p>
+            </div>
+            <div class="nav-status">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Checking...</span>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h2>Navigation</h2>
+                    <button class="nav-button active" data-tab="chat">💬 Chat</button>
+                    <button class="nav-button" data-tab="search">🔍 Search</button>
+                    <button class="nav-button" data-tab="documents">📄 Documents</button>
+                    <button class="nav-button" data-tab="analytics">📊 Analytics</button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h2>Upload Documents</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <p>Drag & drop files here or click to upload</p>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.docx,.txt,.md,.json,.csv" style="display: none;">
+                    </div>
+                    <button class="btn btn-primary" id="uploadBtn">Choose Files</button>
+                    <div id="uploadStatus" class="upload-status"></div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h2>Settings</h2>
+                    <label>
+                        Results per query
+                        <input type="number" id="topK" min="1" max="20" value="5">
+                    </label>
+                    <label>
+                        Min. Similarity
+                        <input type="number" id="threshold" min="0" max="1" step="0.1" value="0">
+                    </label>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-area">
+                <!-- Chat Tab -->
+                <div class="tab-content active" id="chatTab">
+                    <div class="chat-container">
+                        <div class="messages-box" id="messagesBox"></div>
+                        <div class="input-area">
+                            <textarea id="queryInput" placeholder="Ask a question about your documents..." rows="3"></textarea>
+                            <button id="sendBtn" class="btn btn-primary">Send</button>
+                        </div>
+                        <div class="retrieved-info" id="retrievedInfo" style="display: none;">
+                            <h3>Retrieved Context</h3>
+                            <div id="retrievedList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Tab -->
+                <div class="tab-content" id="searchTab">
+                    <div class="search-container">
+                        <h2>Semantic Search</h2>
+                        <div class="search-input-area">
+                            <input type="text" id="searchQuery" placeholder="Enter search query...">
+                            <button id="searchBtn" class="btn btn-primary">Search</button>
+                        </div>
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                </div>
+
+                <!-- Documents Tab -->
+                <div class="tab-content" id="documentsTab">
+                    <div class="documents-container">
+                        <h2>Document Library</h2>
+                        <div id="documentsList" class="documents-list"></div>
+                        <div id="noDocuments" class="empty-state">
+                            <p>No documents uploaded yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div class="tab-content" id="analyticsTab">
+                    <div class="analytics-container">
+                        <h2>Analytics Dashboard</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Total Documents</h3>
+                                <p id="statDocs" class="stat-value">0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Characters</h3>
+                                <p id="statChars" class="stat-value">0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Avg. Doc Size</h3>
+                                <p id="statAvg" class="stat-value">0 KB</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Document Types</h3>
+                                <p id="statTypes" class="stat-value">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
