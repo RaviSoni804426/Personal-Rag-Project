@@ -22,7 +22,7 @@ openpyxl==3.1.2
 # sqlite3 is built into Python; no pip package required
 
 # Web UI
-gradio==4.15.0  # Optional: for Gradio Space deployment
+# Gradio is installed by the Space build (gradio==6.15.2); remove older pinned version to avoid conflicts
 
 # Utilities
 python-multipart==0.0.6
