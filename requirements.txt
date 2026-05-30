@@ -26,7 +26,8 @@ openpyxl==3.1.2
 # Gradio is installed by the Space build (gradio==6.15.2); remove older pinned version to avoid conflicts
 
 # Utilities
-python-multipart==0.0.6
+# Use python-multipart version compatible with Gradio 6.15.2
+python-multipart==0.0.18
 aiofiles==23.2.1
 
 # Development
