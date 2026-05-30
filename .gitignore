@@ -5,5 +5,10 @@ __pycache__/
 env/
 venv/
 .venv
-/.idea
+.idea
 .DS_Store
+data/datamind.db
+logs/
+requirements.full.txt
+scripts/
+docs/
