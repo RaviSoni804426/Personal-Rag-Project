@@ -2,6 +2,7 @@ import os
 import uuid
 import json
 import datetime
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from backend.database.models import Document, DocumentChunk
 from backend.ingestion.loaders import get_loader
