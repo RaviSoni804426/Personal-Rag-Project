@@ -50,7 +50,11 @@ export interface AnalyticsResponse {
   }>;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const BASE_URL = typeof window !== "undefined"
+  ? (window.location.port === "3000"
+      ? "http://localhost:8000/api"
+      : `${window.location.origin}/api`)
+  : "http://localhost:8000/api";
 
 export const apiService = {
   async uploadFile(

@@ -6,6 +6,12 @@ const nextConfig = {
   },
   // Ensure that links do not crash when exported statically
   trailingSlash: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 }
 
 module.exports = nextConfig

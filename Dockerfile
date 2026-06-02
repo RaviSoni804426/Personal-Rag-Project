@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 
 # --- Stage 3: Final Production Runner ---
@@ -37,9 +37,8 @@ WORKDIR /app
 RUN groupadd -g 10001 appgroup && \
     useradd -u 10001 -g appgroup -m -s /bin/bash appuser
 
-# Copy Python packages from builder stage
-COPY --from=backend-builder /root/.local /home/appuser/.local
-ENV PATH=/home/appuser/.local/bin:$PATH
+# Copy Python packages from builder stage globally
+COPY --from=backend-builder /usr/local /usr/local
 ENV PYTHONPATH=/app
 
 # Copy backend files
@@ -52,9 +51,9 @@ COPY --from=frontend-builder --chown=appuser:appgroup /frontend/out/ ./backend/s
 COPY --chown=appuser:appgroup README.md .
 COPY --chown=appuser:appgroup .env.example .
 
-# Create persistent storage directories
-RUN mkdir -p /app/data /app/data/chroma_db /app/data/uploads && \
-    chown -R appuser:appgroup /app/data
+# Create persistent storage directories with global write permissions for dynamic UIDs
+RUN mkdir -p /app/data /app/data/chroma_db /app/data/uploads /app/data/.cache && \
+    chmod -R 777 /app/data
 
 USER appuser
 
@@ -65,6 +64,8 @@ ENV HOST=0.0.0.0
 ENV PORT=7860
 ENV DATABASE_URL=sqlite:////app/data/rag_platform.db
 ENV CHROMA_PERSIST_DIR=/app/data/chroma_db
+ENV HF_HOME=/app/data/.cache
+ENV TORCH_HOME=/app/data/.cache
 
 # Run FastAPI app
 CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
