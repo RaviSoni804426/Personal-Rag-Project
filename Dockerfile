@@ -38,7 +38,8 @@ RUN groupadd -g 10001 appgroup && \
     useradd -u 10001 -g appgroup -m -s /bin/bash appuser
 
 # Copy Python packages from builder stage globally
-COPY --from=backend-builder /usr/local /usr/local
+COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-builder /usr/local/bin /usr/local/bin
 ENV PYTHONPATH=/app
 
 # Copy backend files
