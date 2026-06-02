@@ -211,14 +211,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
                     <span className="text-slate-600">Evals:</span>
                     <span className="flex items-center space-x-0.5" title="Faithfulness">
                       <span>F:</span>
-                      <strong className={msg.eval_scores.faithfulness >= 0.8 ? "text-emerald-400" : "text-amber-400"}>
-                        {Math.round(msg.eval_scores.faithfulness * 100)}%
+                      <strong className={(msg.eval_scores?.faithfulness ?? 0) >= 0.8 ? "text-emerald-400" : "text-amber-400"}>
+                        {Math.round((msg.eval_scores?.faithfulness ?? 0) * 100)}%
                       </strong>
                     </span>
                     <span className="flex items-center space-x-0.5" title="Answer Relevance">
                       <span>R:</span>
-                      <strong className={msg.eval_scores.answer_relevance >= 0.8 ? "text-emerald-400" : "text-amber-400"}>
-                        {Math.round(msg.eval_scores.answer_relevance * 100)}%
+                      <strong className={(msg.eval_scores?.answer_relevance ?? 0) >= 0.8 ? "text-emerald-400" : "text-amber-400"}>
+                        {Math.round((msg.eval_scores?.answer_relevance ?? 0) * 100)}%
                       </strong>
                     </span>
                   </div>
