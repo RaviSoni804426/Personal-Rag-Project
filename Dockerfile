@@ -19,6 +19,9 @@ RUN npm run build
 # --- Stage 2: Initialize Backend Dependencies ---
 FROM python:3.11-slim AS backend-builder
 
+# Limit compiler concurrency to a single thread to control memory usage and prevent OOM build crashes
+ENV MAKEFLAGS="-j 1"
+
 WORKDIR /backend
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \

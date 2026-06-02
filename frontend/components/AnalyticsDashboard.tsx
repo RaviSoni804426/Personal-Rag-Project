@@ -60,7 +60,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
 
         {/* Query Latency */}
         <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-purple-650/40"></div>
+          <div className="absolute top-0 left-0 h-1 w-full bg-purple-600/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Avg Latency</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.avg_latency_ms ? `${Math.round(analytics.avg_latency_ms)}ms` : "0ms"}
@@ -70,7 +70,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
 
         {/* Tokens Consumption */}
         <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-pink-650/40"></div>
+          <div className="absolute top-0 left-0 h-1 w-full bg-pink-600/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Tokens Used</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.token_usage_total ? analytics.token_usage_total.toLocaleString() : "0"}
@@ -80,7 +80,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
 
         {/* Knowledge Base Size */}
         <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-emerald-650/40"></div>
+          <div className="absolute top-0 left-0 h-1 w-full bg-emerald-600/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Database Index</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.docs_indexed_count} <span className="text-xs text-slate-500 font-normal">files</span>

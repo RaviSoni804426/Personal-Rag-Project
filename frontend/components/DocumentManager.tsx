@@ -130,7 +130,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents, onR
                 <select
                   value={strategy}
                   onChange={(e) => setStrategy(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-indigo-650 transition cursor-pointer"
+                  className="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-indigo-600 transition cursor-pointer"
                 >
                   <option value="recursive">Recursive Character Splitting</option>
                   <option value="semantic">Semantic Similarity-Based</option>
