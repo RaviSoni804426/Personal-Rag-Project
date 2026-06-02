@@ -1,3 +1,12 @@
+---
+title: Enterprise Knowledge Intelligence Platform
+emoji: "🧠"
+colorFrom: "blue"
+colorTo: "indigo"
+sdk: docker
+pinned: false
+---
+
 # Enterprise Knowledge Intelligence Platform
 
 A state-of-the-art, production-ready Retrieval-Augmented Generation (RAG) platform designed to ingest, segment, index, search, and synthesize enterprise document repositories. 
