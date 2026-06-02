@@ -38,37 +38,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, syste
   ];
 
   return (
-    <aside className="w-72 bg-slate-950/40 backdrop-blur-xl border-r border-slate-900 flex flex-col justify-between h-screen text-slate-200">
+    <aside className="w-72 bg-slate-900/30 border-r border-slate-900 flex flex-col justify-between h-screen text-slate-200">
       <div className="p-6">
         {/* Brand Header */}
-        <div className="flex items-center space-x-3 mb-8 group cursor-default">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center space-x-3 mb-8 cursor-default">
+          <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center shadow">
+            <svg className="w-5.5 h-5.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
             </svg>
           </div>
           <div>
-            <h1 className="font-bold text-lg bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent leading-none group-hover:text-glow transition duration-300">
-              Enterprise Knowledge
+            <h1 className="font-bold text-base text-slate-100">
+              Enterprise RAG
             </h1>
-            <span className="text-[10px] text-indigo-400 font-bold tracking-wider uppercase">
-              Intelligence Platform
+            <span className="text-[9px] text-slate-500 font-bold tracking-wider uppercase block -mt-0.5">
+              Knowledge Platform
             </span>
           </div>
         </div>
 
         {/* Menu Navigation */}
-        <nav className="space-y-2">
+        <nav className="space-y-1">
           {menuItems.map((item) => {
             const active = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
+                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg transition duration-150 text-xs font-medium ${
                   active
-                    ? "bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-transparent border-l-2 border-l-indigo-500 border-y-transparent border-r-transparent text-indigo-300 shadow-md shadow-indigo-500/5"
-                    : "hover:bg-slate-800/30 text-slate-500 hover:text-slate-300 border-l-2 border-transparent"
+                    ? "bg-slate-900 border border-slate-800 text-indigo-400 font-semibold"
+                    : "text-slate-400 hover:text-slate-200 border border-transparent"
                 }`}
               >
                 <span className={active ? "text-indigo-400" : "text-slate-500"}>

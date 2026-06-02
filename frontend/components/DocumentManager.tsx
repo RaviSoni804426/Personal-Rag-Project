@@ -96,7 +96,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents, onR
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Upload Container Panel */}
-        <section className="glass-panel rounded-2xl p-5 space-y-5 h-fit shadow-lg shadow-slate-950/40">
+        <section className="bg-slate-900 border border-slate-850 rounded-2xl p-5 space-y-5 h-fit shadow-sm">
           <h3 className="font-bold text-sm text-slate-200">Index New Document</h3>
           
           <form onSubmit={handleUpload} className="space-y-4">
@@ -130,7 +130,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents, onR
                 <select
                   value={strategy}
                   onChange={(e) => setStrategy(e.target.value)}
-                  className="w-full bg-slate-950/80 border border-slate-800 text-xs rounded-xl px-3 py-2.5 text-slate-200 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-all duration-300 cursor-pointer"
+                  className="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-indigo-650 transition cursor-pointer"
                 >
                   <option value="recursive">Recursive Character Splitting</option>
                   <option value="semantic">Semantic Similarity-Based</option>
@@ -178,7 +178,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents, onR
             <button
               type="submit"
               disabled={!file || uploading}
-              className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none glow-button shadow shadow-indigo-500/20"
+              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition active:scale-98 disabled:opacity-40 disabled:pointer-events-none shadow"
             >
               {uploading ? "Ingesting & indexing..." : "Start Upload Ingestion"}
             </button>
@@ -186,7 +186,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents, onR
         </section>
 
         {/* Documents Indexed Grid List */}
-        <section className="lg:col-span-2 glass-panel rounded-2xl p-5 shadow-lg shadow-slate-950/40">
+        <section className="lg:col-span-2 bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm">
           <h3 className="font-bold text-sm text-slate-200 mb-4">Currently Indexed Knowledge Bases ({documents.length})</h3>
           
           <div className="overflow-x-auto">

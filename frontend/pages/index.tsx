@@ -54,7 +54,7 @@ export default function Home() {
   }, [activeTab]);
 
   return (
-    <div className="flex h-screen bg-radial-spotlight bg-dot-grid font-sans antialiased text-slate-200 overflow-hidden">
+    <div className="flex h-screen bg-slate-dark font-sans antialiased text-slate-200 overflow-hidden">
       <Head>
         <title>Enterprise Knowledge Intelligence Platform - Next-Gen RAG System</title>
         <meta name="description" content="Production-ready high-precision hybrid retrieval and advanced document reasoning synthesis." />

@@ -101,14 +101,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
   return (
     <div className="flex flex-col h-full bg-transparent text-slate-100 relative">
       {/* Upper Control Bar */}
-      <header className="glass-panel px-6 py-4 flex items-center justify-between shadow-lg shadow-slate-950/25 border-t-0 border-x-0">
+      <header className="bg-slate-900 border-b border-slate-850 px-6 py-4 flex items-center justify-between shadow-sm">
         <div>
-          <h2 className="text-base font-bold bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">Conversational Query Console</h2>
-          <p className="text-[11px] text-slate-400">Ask questions grounded in the indexed knowledge base</p>
+          <h2 className="text-sm font-bold text-slate-100">Conversational Query Console</h2>
+          <p className="text-[11px] text-slate-500">Ask questions grounded in the indexed knowledge base</p>
         </div>
         
         {/* Dynamic Context Settings */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3.5">
           <div className="flex flex-col">
             <label className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">
               Document Context Filter
@@ -116,7 +116,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              className="bg-slate-950/80 border border-slate-800/80 text-xs rounded-xl px-3 py-1.5 text-slate-200 outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 transition-all duration-300 cursor-pointer"
+              className="bg-slate-950 border border-slate-800 text-xs rounded-lg px-3 py-1.5 text-slate-200 outline-none focus:border-indigo-600 transition cursor-pointer"
             >
               <option value="">Query All Scope Documents</option>
               {documents.filter(d => d.status === "indexed").map((doc) => (
@@ -137,7 +137,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
               max="15"
               value={retrievalK}
               onChange={(e) => setRetrievalK(parseInt(e.target.value) || 5)}
-              className="w-20 bg-slate-950/80 border border-slate-800/80 text-xs rounded-xl px-3 py-1.5 text-slate-200 outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 transition-all duration-300"
+              className="w-20 bg-slate-950 border border-slate-800 text-xs rounded-lg px-3 py-1.5 text-slate-200 outline-none focus:border-indigo-600 transition"
             />
           </div>
         </div>
@@ -152,10 +152,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
           >
             {/* Bubble */}
             <div
-              className={`max-w-[70%] rounded-2xl px-5 py-3.5 text-sm shadow-lg transition-all duration-300 ${
+              className={`max-w-[70%] rounded-2xl px-5 py-3 text-sm shadow-sm transition-all duration-200 ${
                 msg.sender === "user"
-                  ? "bg-gradient-to-tr from-indigo-600 via-indigo-600 to-purple-600 border border-indigo-500/25 shadow-md shadow-indigo-500/5 text-white rounded-br-none"
-                  : "glass-panel shadow-lg shadow-slate-950/30 text-slate-200 rounded-bl-none border border-slate-800/80"
+                  ? "bg-indigo-600 text-white rounded-br-none"
+                  : "bg-slate-900 border border-slate-850 text-slate-200 rounded-bl-none"
               }`}
             >
               <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
@@ -245,7 +245,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
       </div>
 
       {/* Input Message Container */}
-      <footer className="p-6 bg-slate-950/30 backdrop-blur-xl border-t border-slate-900/60">
+      <footer className="p-6 bg-slate-900/60 border-t border-slate-850">
         <form onSubmit={handleSubmit} className="relative flex items-center">
           <input
             type="text"
@@ -257,12 +257,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
                 ? "Upload document indices in Document Manager first..."
                 : "Ask any document query..."
             }
-            className="w-full bg-slate-950/80 text-slate-200 rounded-2xl px-5 py-4 border border-slate-900 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition duration-300 pr-16 text-sm shadow-inner"
+            className="w-full bg-slate-950 text-slate-200 rounded-xl px-5 py-4 border border-slate-850 outline-none focus:border-indigo-600 transition duration-150 pr-16 text-sm shadow-sm"
           />
           <button
             type="submit"
             disabled={loading || !query.trim() || documents.length === 0}
-            className="absolute right-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl p-2.5 transition active:scale-95 disabled:opacity-30 disabled:pointer-events-none glow-button shadow-lg shadow-indigo-500/20"
+            className="absolute right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2.5 transition active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -273,15 +273,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documents }) => {
 
       {/* Slide-over Right Citation Panel Modal */}
       {activeSource && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-end transition duration-300">
-          <div className="w-[520px] h-full glass-panel-glow border-l border-indigo-500/10 p-6 flex flex-col justify-between shadow-2xl shadow-slate-950/50">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-end transition duration-350">
+          <div className="w-[480px] h-full bg-slate-900 border-l border-slate-800 p-6 flex flex-col justify-between shadow-2xl">
             {/* Header */}
             <div>
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-850">
                 <h3 className="font-bold text-sm text-slate-100">Verification Source Details</h3>
                 <button
                   onClick={() => setActiveSource(null)}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition"
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-slate-200 transition"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />

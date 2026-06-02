@@ -49,8 +49,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total Queries */}
-        <div className="glass-panel neon-border-glow-indigo rounded-2xl p-5 shadow relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-30 group-hover:opacity-100 transition duration-300"></div>
+        <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 left-0 h-1 w-full bg-indigo-600/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Total Queries</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.total_queries}
@@ -59,8 +59,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
         </div>
 
         {/* Query Latency */}
-        <div className="glass-panel neon-border-glow-purple rounded-2xl p-5 shadow relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-purple-500 to-pink-500 opacity-30 group-hover:opacity-100 transition duration-300"></div>
+        <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 left-0 h-1 w-full bg-purple-650/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Avg Latency</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.avg_latency_ms ? `${Math.round(analytics.avg_latency_ms)}ms` : "0ms"}
@@ -69,8 +69,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
         </div>
 
         {/* Tokens Consumption */}
-        <div className="glass-panel neon-border-glow-rose rounded-2xl p-5 shadow relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-pink-500 to-rose-500 opacity-30 group-hover:opacity-100 transition duration-300"></div>
+        <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 left-0 h-1 w-full bg-pink-650/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Tokens Used</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.token_usage_total ? analytics.token_usage_total.toLocaleString() : "0"}
@@ -79,8 +79,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
         </div>
 
         {/* Knowledge Base Size */}
-        <div className="glass-panel neon-border-glow-emerald rounded-2xl p-5 shadow relative overflow-hidden group">
-          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-teal-500 opacity-30 group-hover:opacity-100 transition duration-300"></div>
+        <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 left-0 h-1 w-full bg-emerald-650/40"></div>
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Database Index</span>
           <span className="text-2xl font-extrabold text-slate-100 mt-2 block font-mono">
             {analytics.docs_indexed_count} <span className="text-xs text-slate-500 font-normal">files</span>
@@ -92,7 +92,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
       </div>
 
       {/* RAG Verification Evaluation Meters Section */}
-      <section className="glass-panel rounded-2xl p-5 shadow-lg shadow-slate-950/40">
+      <section className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm">
         <h3 className="font-bold text-sm text-slate-200 mb-6">Autonomous RAG Validation Grades</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -185,7 +185,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analytic
       </section>
 
       {/* Query Log Diagnostic Registry */}
-      <section className="glass-panel rounded-2xl p-5 shadow-lg shadow-slate-950/40">
+      <section className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-sm">
         <h3 className="font-bold text-sm text-slate-200 mb-4">Recent Query Diagnostics</h3>
         
         <div className="overflow-x-auto">
