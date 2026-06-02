@@ -1,5 +1,7 @@
--- Minimal requirements for Hugging Face Spaces (Gradio runtime)
-# Keep the install lean to reduce build time and avoid native build failures
+# DataMind Enterprise RAG Package Dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0.post1
+pydantic==2.5.2
 python-dotenv==1.0.0
 requests==2.31.0
 PyPDF2==3.0.1
@@ -7,3 +9,7 @@ python-docx==0.8.11
 python-multipart==0.0.18
 aiofiles==23.2.1
 numpy==1.26.4
+
+# Testing frameworks
+pytest==7.4.3
+httpx==0.25.2

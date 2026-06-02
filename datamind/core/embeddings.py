@@ -1,12 +1,15 @@
 """
 Embeddings service for generating vector representations.
-Integrates with Groq API when available and falls back to a local
-deterministic embedding model for offline development.
+Integrates with Groq API when available, caches embeddings in SQLite for speed/cost,
+and falls back to a local deterministic embedding model for offline development.
 """
 
 import hashlib
 import re
+import json
+import sqlite3
 from typing import List, Optional
+from pathlib import Path
 
 import numpy as np
 import requests
@@ -18,7 +21,7 @@ logger = get_logger(__name__)
 
 
 class EmbeddingsService:
-    """Service for generating and managing embeddings."""
+    """Service for generating, caching, and managing embeddings."""
 
     def __init__(
         self,
@@ -33,6 +36,10 @@ class EmbeddingsService:
         self.timeout = settings.REQUEST_TIMEOUT
         self.local_mode = not bool(self.api_key)
 
+        # Ensure database directory exists for the cache
+        if settings.DB_PATH:
+            Path(settings.DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+
         if self.local_mode:
             logger.warning(
                 "GROQ_API_KEY not configured, using local fallback embeddings"
@@ -40,13 +47,52 @@ class EmbeddingsService:
         else:
             logger.info(f"EmbeddingsService initialized with model: {self.model}")
 
+    def _get_cached_embedding(self, text_hash: str) -> Optional[List[float]]:
+        """Query persistent SQLite cache for pre-computed vector."""
+        try:
+            with sqlite3.connect(settings.DB_PATH) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT embedding FROM embedding_cache WHERE text_hash = ?",
+                    (text_hash,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    return json.loads(row[0])
+        except Exception:
+            # Fail silently since cache tables are created during vectors initialization
+            pass
+        return None
+
+    def _cache_embedding(self, text_hash: str, embedding: List[float]) -> None:
+        """Write computed vector to persistent SQLite cache."""
+        try:
+            with sqlite3.connect(settings.DB_PATH) as conn:
+                cursor = conn.cursor()
+                # Create table if missing just in case
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS embedding_cache (
+                        text_hash TEXT PRIMARY KEY,
+                        embedding TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute(
+                    "INSERT OR REPLACE INTO embedding_cache (text_hash, embedding) VALUES (?, ?)",
+                    (text_hash, json.dumps(embedding))
+                )
+                conn.commit()
+        except Exception as e:
+            logger.debug(f"Failed to save cached embedding: {e}")
+
     def embed_text(self, text: str) -> List[float]:
         """Generate embedding for a single text."""
         return self.embed_texts([text])[0]
 
     def embed_texts(self, texts: List[str], batch_size: int = 50) -> List[List[float]]:
         """
-        Generate embeddings for multiple texts.
+        Generate embeddings for multiple texts. Resolves hits via the SQLite cache,
+        and requests uncached items in batches to optimize latency and costs.
         
         Args:
             texts: List of texts to embed
@@ -58,23 +104,55 @@ class EmbeddingsService:
         if not texts:
             return []
         
-        logger.info(f"Generating embeddings for {len(texts)} texts")
+        logger.info(f"Generating embeddings for {len(texts)} texts (batch size: {batch_size})")
 
+        results: List[Optional[List[float]]] = [None] * len(texts)
+        uncached_indices = []
+        uncached_texts = []
+
+        # Step 1: Query persistent cache
+        for idx, text in enumerate(texts):
+            text_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            cached = self._get_cached_embedding(text_hash)
+            if cached is not None:
+                results[idx] = cached
+            else:
+                uncached_indices.append(idx)
+                uncached_texts.append(text)
+
+        hit_rate = (len(texts) - len(uncached_indices)) / len(texts) * 100
+        logger.info(f"Embedding Cache hits: {len(texts) - len(uncached_indices)}/{len(texts)} ({hit_rate:.1f}%)")
+
+        if not uncached_texts:
+            return results  # All items were resolved via cache!
+
+        # Step 2: Fetch embeddings for uncached texts
+        computed_embeddings = []
+        
         if self.local_mode:
-            embeddings = [self._embed_locally(text) for text in texts]
-            logger.info(f"Successfully generated {len(embeddings)} local embeddings")
-            return embeddings
+            computed_embeddings = [self._embed_locally(text) for text in uncached_texts]
+        else:
+            # Process in API batches
+            try:
+                for i in range(0, len(uncached_texts), batch_size):
+                    batch = uncached_texts[i:i + batch_size]
+                    batch_embs = self._embed_batch(batch)
+                    computed_embeddings.extend(batch_embs)
+            except Exception as e:
+                logger.error(f"Batch embedding API request failed: {e}. Falling back to local model.")
+                computed_embeddings = [self._embed_locally(text) for text in uncached_texts]
 
-        all_embeddings = []
-        
-        # Process in batches
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
-            embeddings = self._embed_batch(batch)
-            all_embeddings.extend(embeddings)
-        
-        logger.info(f"Successfully generated {len(all_embeddings)} embeddings")
-        return all_embeddings
+        # Step 3: Cache computed embeddings and reconstruct full results array
+        for local_idx, global_idx in enumerate(uncached_indices):
+            embedding = computed_embeddings[local_idx]
+            results[global_idx] = embedding
+            
+            # Persist back to database cache
+            text = uncached_texts[local_idx]
+            text_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            self._cache_embedding(text_hash, embedding)
+
+        return results
 
     def _embed_locally(self, text: str) -> List[float]:
         """Generate a deterministic, normalized fallback embedding locally."""
@@ -83,7 +161,8 @@ class EmbeddingsService:
         tokens = re.findall(r"[A-Za-z0-9_]+", text.lower())
 
         if not tokens:
-            return vector.tolist()
+            # Add a small uniform noise if text is completely empty to prevent zero vectors
+            return (np.ones(dimension, dtype=np.float32) / np.sqrt(dimension)).tolist()
 
         for token in tokens:
             digest = hashlib.sha256(token.encode("utf-8")).digest()
@@ -128,9 +207,6 @@ class EmbeddingsService:
         
         except requests.exceptions.RequestException as e:
             logger.error(f"Groq API request failed: {e}")
-            if not self.local_mode:
-                logger.warning("Falling back to local embeddings after Groq failure")
-                return [self._embed_locally(text) for text in texts]
             raise RuntimeError(f"Embeddings generation failed: {e}") from e
         
         except Exception as e:
@@ -143,7 +219,6 @@ class EmbeddingsService:
         try:
             embeddings = []
             for item in response.get("data", []):
-                # Try different possible response formats
                 emb = (
                     item.get("embedding")
                     or item.get("embeddings")
@@ -175,13 +250,11 @@ class EmbeddingsService:
             return False
 
     async def embed_texts_async(self, texts: List[str]) -> List[List[float]]:
-        """
-        Asynchronous embedding generation using thread pool.
-        """
+        """Asynchronous embedding generation using thread pool."""
+        import asyncio
         loop = None
         try:
-            import asyncio
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)

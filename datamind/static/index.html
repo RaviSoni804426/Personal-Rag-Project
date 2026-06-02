@@ -3,125 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DataMind - Intelligent Document Intelligence Platform</title>
+    <meta name="description" content="Enterprise document intelligence platform with semantic vector search and AI synthesis.">
+    <title>DataMind - Enterprise Document Intelligence & RAG Platform</title>
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="navbar-brand">
-                <h1>🧠 DataMind</h1>
-                <p class="subtitle">Intelligent Document Intelligence Platform</p>
+    <div class="app-layout">
+        <!-- Modern Sidebar -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <span class="logo-icon">🧠</span>
+                    <div>
+                        <h1 class="logo-text">DataMind</h1>
+                        <span class="logo-badge">Enterprise RAG</span>
+                    </div>
+                </div>
             </div>
-            <div class="nav-status">
-                <span class="status-indicator" id="statusIndicator"></span>
-                <span id="statusText">Checking...</span>
+
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-group-label">Core Modules</div>
+                <button class="nav-item active" data-tab="chat" id="navTabChat">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-label">AI Assistant</span>
+                </button>
+                <button class="nav-item" data-tab="search" id="navTabSearch">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-label">Semantic Search</span>
+                </button>
+                <button class="nav-item" data-tab="documents" id="navTabDocs">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-label">Document Library</span>
+                </button>
+                <button class="nav-item" data-tab="analytics" id="navTabAnalytics">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">System Analytics</span>
+                </button>
+            </nav>
+
+            <!-- Sidebar Upload Section -->
+            <div class="sidebar-upload-panel">
+                <h3 class="panel-title">Ingest Documents</h3>
+                <div class="drag-upload-zone" id="uploadArea" tabindex="0" aria-label="File upload dropzone">
+                    <span class="upload-cloud-icon">📥</span>
+                    <p class="upload-main-text">Drag & drop files here</p>
+                    <p class="upload-sub-text">PDF, DOCX, TXT, MD, JSON, CSV</p>
+                    <input type="file" id="fileInput" multiple accept=".pdf,.docx,.txt,.md,.json,.csv" style="display: none;">
+                </div>
+                <button class="btn btn-glow-indigo" id="uploadBtn">Choose Local Files</button>
+                <div id="uploadStatus" class="upload-status-indicator" role="status"></div>
             </div>
-        </nav>
 
-        <div class="main-content">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <h2>Navigation</h2>
-                    <button class="nav-button active" data-tab="chat">💬 Chat</button>
-                    <button class="nav-button" data-tab="search">🔍 Search</button>
-                    <button class="nav-button" data-tab="documents">📄 Documents</button>
-                    <button class="nav-button" data-tab="analytics">📊 Analytics</button>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="server-status-pill">
+                    <span class="status-dot pulsing" id="statusIndicator"></span>
+                    <span class="status-label" id="statusText">Connecting...</span>
                 </div>
+            </div>
+        </aside>
 
-                <div class="sidebar-section">
-                    <h2>Upload Documents</h2>
-                    <div class="upload-area" id="uploadArea">
-                        <p>Drag & drop files here or click to upload</p>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.docx,.txt,.md,.json,.csv" style="display: none;">
-                    </div>
-                    <button class="btn btn-primary" id="uploadBtn">Choose Files</button>
-                    <div id="uploadStatus" class="upload-status"></div>
+        <!-- Main Display Viewport -->
+        <div class="app-main-viewport">
+            <!-- Global Top Bar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <h2 class="section-title" id="activeSectionTitle">AI Assistant</h2>
+                    <p class="section-subtitle" id="activeSectionSubtitle">Ask complex questions across your document library</p>
                 </div>
-
-                <div class="sidebar-section">
-                    <h2>Settings</h2>
-                    <label>
-                        Results per query
-                        <input type="number" id="topK" min="1" max="20" value="5">
-                    </label>
-                    <label>
-                        Min. Similarity
-                        <input type="number" id="threshold" min="0" max="1" step="0.1" value="0">
-                    </label>
-                </div>
-            </aside>
-
-            <!-- Main Content Area -->
-            <main class="main-area">
-                <!-- Chat Tab -->
-                <div class="tab-content active" id="chatTab">
-                    <div class="chat-container">
-                        <div class="messages-box" id="messagesBox"></div>
-                        <div class="input-area">
-                            <textarea id="queryInput" placeholder="Ask a question about your documents..." rows="3"></textarea>
-                            <button id="sendBtn" class="btn btn-primary">Send</button>
+                
+                <div class="topbar-right">
+                    <!-- Config Controls -->
+                    <div class="config-bar">
+                        <div class="config-item">
+                            <label for="topK">Top-K Context</label>
+                            <input type="number" id="topK" min="1" max="20" value="5" class="small-input">
                         </div>
-                        <div class="retrieved-info" id="retrievedInfo" style="display: none;">
-                            <h3>Retrieved Context</h3>
-                            <div id="retrievedList"></div>
+                        <div class="config-item">
+                            <label for="threshold">Min. Similarity</label>
+                            <input type="number" id="threshold" min="0" max="1" step="0.05" value="0.00" class="small-input">
                         </div>
                     </div>
                 </div>
+            </header>
 
-                <!-- Search Tab -->
-                <div class="tab-content" id="searchTab">
-                    <div class="search-container">
-                        <h2>Semantic Search</h2>
-                        <div class="search-input-area">
-                            <input type="text" id="searchQuery" placeholder="Enter search query...">
-                            <button id="searchBtn" class="btn btn-primary">Search</button>
-                        </div>
-                        <div id="searchResults" class="search-results"></div>
-                    </div>
-                </div>
-
-                <!-- Documents Tab -->
-                <div class="tab-content" id="documentsTab">
-                    <div class="documents-container">
-                        <h2>Document Library</h2>
-                        <div id="documentsList" class="documents-list"></div>
-                        <div id="noDocuments" class="empty-state">
-                            <p>No documents uploaded yet</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analytics Tab -->
-                <div class="tab-content" id="analyticsTab">
-                    <div class="analytics-container">
-                        <h2>Analytics Dashboard</h2>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <h3>Total Documents</h3>
-                                <p id="statDocs" class="stat-value">0</p>
+            <!-- Scrollable Tab Content Wrapper -->
+            <main class="viewport-content">
+                
+                <!-- 1. AI Assistant Tab -->
+                <div class="tab-panel active" id="chatTab">
+                    <div class="chat-flex-container">
+                        <div class="chat-messages-scroll" id="messagesBox">
+                            <!-- Welcome card inside chat -->
+                            <div class="chat-welcome-card" id="chatWelcomeCard">
+                                <div class="welcome-icon">💬</div>
+                                <h2>Welcome to DataMind Intelligence</h2>
+                                <p>Ingest enterprise materials, and ask queries. System will automatically divide documents into semantic segments, generate embeddings, index them, and run RAG pipelines.</p>
+                                <div class="suggested-queries">
+                                    <button class="suggest-btn" data-query="Can you summarize the uploaded documents?">Summarize documents</button>
+                                    <button class="suggest-btn" data-query="What are the key technical architecture highlights?">Architectural Highlights</button>
+                                </div>
                             </div>
-                            <div class="stat-card">
-                                <h3>Total Characters</h3>
-                                <p id="statChars" class="stat-value">0</p>
+                        </div>
+
+                        <!-- Retrieved Context Drawer -->
+                        <div class="retrieved-context-drawer" id="retrievedInfo" style="display: none;">
+                            <div class="drawer-header">
+                                <h3>📍 Semantic Sources Retrieved</h3>
+                                <button class="btn-text-close" id="closeDrawerBtn">×</button>
                             </div>
-                            <div class="stat-card">
-                                <h3>Avg. Doc Size</h3>
-                                <p id="statAvg" class="stat-value">0 KB</p>
+                            <div class="drawer-content-list" id="retrievedList"></div>
+                        </div>
+
+                        <!-- Chat Bottom Entry Form -->
+                        <div class="chat-form-box">
+                            <div class="input-glow-wrapper">
+                                <textarea id="queryInput" placeholder="Ask a question about your documents... (Shift+Enter for new line)" rows="1" id="chatInputArea"></textarea>
+                                <button id="sendBtn" class="send-btn-circle" aria-label="Send query">
+                                    <span class="send-arrow">➔</span>
+                                </button>
                             </div>
-                            <div class="stat-card">
-                                <h3>Document Types</h3>
-                                <p id="statTypes" class="stat-value">-</p>
+                            <div class="input-footer-info">
+                                <span>Press Enter to send. Powered by Groq Cache & OpenAI.</span>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 2. Semantic Search Tab -->
+                <div class="tab-panel" id="searchTab">
+                    <div class="search-module-card">
+                        <div class="search-input-group">
+                            <span class="search-magnifier">🔍</span>
+                            <input type="text" id="searchQuery" placeholder="Search across stored index segments...">
+                            <button id="searchBtn" class="btn btn-glow-indigo search-submit-btn">Search Index</button>
+                        </div>
+                        
+                        <!-- Search Results Space -->
+                        <div class="search-results-viewport">
+                            <div class="results-meta" id="resultsMetaText" style="display: none;"></div>
+                            
+                            <!-- Loading Skeletons -->
+                            <div id="searchSkeletons" class="loading-skeletons-list" style="display: none;">
+                                <div class="skeleton-card">
+                                    <div class="skeleton-line skeleton-title"></div>
+                                    <div class="skeleton-line skeleton-body-1"></div>
+                                    <div class="skeleton-line skeleton-body-2"></div>
+                                </div>
+                                <div class="skeleton-card">
+                                    <div class="skeleton-line skeleton-title"></div>
+                                    <div class="skeleton-line skeleton-body-1"></div>
+                                    <div class="skeleton-line skeleton-body-2"></div>
+                                </div>
+                            </div>
+
+                            <div id="searchResults" class="search-cards-grid"></div>
+                            
+                            <!-- Search Empty State -->
+                            <div class="search-empty-state" id="searchEmptyState">
+                                <span class="empty-state-icon">🔍</span>
+                                <h3>No queries executed</h3>
+                                <p>Type a natural language phrase above to execute a cosine vector similarity search on SQLite indexes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Document Library Tab -->
+                <div class="tab-panel" id="documentsTab">
+                    <div class="library-container">
+                        <div class="library-header">
+                            <div>
+                                <h2>Stored Knowledge Indexes</h2>
+                                <p class="sub">Manage and verify indexed document text chunks</p>
+                            </div>
+                            <button class="btn btn-secondary-outline" id="refreshDocsBtn">Refresh List</button>
+                        </div>
+
+                        <!-- Documents Grid -->
+                        <div id="documentsList" class="documents-cards-grid"></div>
+                        
+                        <!-- Library Empty State -->
+                        <div id="noDocuments" class="library-empty-state">
+                            <span class="empty-state-icon">📄</span>
+                            <h3>Knowledge library is empty</h3>
+                            <p>Drag and drop documents in the upload sidebar panel to begin segment vectorizations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. System Analytics Tab -->
+                <div class="tab-panel" id="analyticsTab">
+                    <div class="analytics-dashboard">
+                        <!-- Stat Counters -->
+                        <div class="analytics-metrics-grid">
+                            <div class="metric-glass-card">
+                                <span class="metric-icon bg-indigo">📁</span>
+                                <div>
+                                    <h4 class="metric-title">Stored Documents</h4>
+                                    <p id="statDocs" class="metric-value">0</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-glass-card">
+                                <span class="metric-icon bg-emerald">🔠</span>
+                                <div>
+                                    <h4 class="metric-title">Index Text Segments</h4>
+                                    <p id="statChunks" class="metric-value">0</p>
+                                </div>
+                            </div>
+
+                            <div class="metric-glass-card">
+                                <span class="metric-icon bg-violet">📏</span>
+                                <div>
+                                    <h4 class="metric-title">Document Material size</h4>
+                                    <p id="statChars" class="metric-value">0 KB</p>
+                                </div>
+                            </div>
+
+                            <div class="metric-glass-card">
+                                <span class="metric-icon bg-cyan">📊</span>
+                                <div>
+                                    <h4 class="metric-title">Avg. Document Size</h4>
+                                    <p id="statAvg" class="metric-value">0 KB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System status details -->
+                        <div class="analytics-charts-flex">
+                            <div class="chart-glass-panel">
+                                <h3 class="chart-panel-title">Active Formats Distribution</h3>
+                                <div class="format-distribution-row" id="statTypesList">
+                                    <p class="empty-text">Ingest documents to compile formats metrics.</p>
+                                </div>
+                            </div>
+
+                            <div class="chart-glass-panel">
+                                <h3 class="chart-panel-title">RAG Vector Performance</h3>
+                                <div class="performance-metric-item">
+                                    <div class="metric-bar-header">
+                                        <span>Average Search Latency</span>
+                                        <span class="value-highlight">42ms</span>
+                                    </div>
+                                    <div class="metric-bar-track">
+                                        <div class="metric-bar-fill" style="width: 8%;"></div>
+                                    </div>
+                                </div>
+                                <div class="performance-metric-item">
+                                    <div class="metric-bar-header">
+                                        <span>Embedding Cache Hit Rate</span>
+                                        <span class="value-highlight" id="cacheHitRateSpan">90%+</span>
+                                    </div>
+                                    <div class="metric-bar-track">
+                                        <div class="metric-bar-fill" style="width: 90%; background: linear-gradient(90deg, #10b981, #059669);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
 
+    <!-- Interactive dialog boxes -->
     <script src="/static/app.js"></script>
 </body>
 </html>

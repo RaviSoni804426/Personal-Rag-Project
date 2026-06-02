@@ -3,9 +3,7 @@ title: DataMind
 emoji: "🧠"
 colorFrom: "blue"
 colorTo: "indigo"
-sdk: gradio
-python_version: "3.11"
-app_file: app.py
+sdk: docker
 pinned: false
 ---
 

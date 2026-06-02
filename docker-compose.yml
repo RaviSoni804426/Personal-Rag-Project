@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  datamind:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: datamind-rag:latest
+    container_name: datamind_app
+    ports:
+      - "8080:8080"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - DEBUG=false
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DB_PATH=/app/data/datamind.db
+      - UPLOAD_DIR=/app/data/uploads
+      - LOG_FILE=/app/logs/datamind.log
+    volumes:
+      - datamind_data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  datamind_data:
+    driver: local

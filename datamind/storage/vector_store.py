@@ -1,6 +1,6 @@
 """
 Vector storage and retrieval layer for DataMind.
-Handles embedding storage in SQLite with similarity search.
+Handles embedding storage in SQLite with similarity search and persistent caching.
 """
 
 import json
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 class VectorStore:
-    """SQLite-based vector store for document embeddings and retrieval."""
+    """SQLite-based vector store for document embeddings, caching, and retrieval."""
 
     def __init__(self, db_path: str = "./data/datamind.db"):
         """Initialize vector store."""
@@ -25,7 +25,7 @@ class VectorStore:
         self._initialize_database()
 
     def _initialize_database(self) -> None:
-        """Create database schema if not exists."""
+        """Create database schema if not exists and perform migrations."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -44,14 +44,24 @@ class VectorStore:
                     )
                 """)
                 
-                # Embeddings table
+                # Embeddings table (added chunk_text TEXT during initialization)
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS embeddings (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         doc_id INTEGER NOT NULL,
                         embedding TEXT NOT NULL,
+                        chunk_text TEXT,
                         chunk_index INTEGER DEFAULT 0,
                         FOREIGN KEY (doc_id) REFERENCES documents(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                # Persistent Embedding Cache Table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS embedding_cache (
+                        text_hash TEXT PRIMARY KEY,
+                        embedding TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
                 
@@ -66,7 +76,14 @@ class VectorStore:
                     )
                 """)
                 
-                # Create indexes for performance
+                # Perform Schema Migrations for legacy DB files
+                cursor.execute("PRAGMA table_info(embeddings)")
+                columns = [col[1] for col in cursor.fetchall()]
+                if "chunk_text" not in columns:
+                    logger.info("Migrating database: adding 'chunk_text' column to 'embeddings' table.")
+                    cursor.execute("ALTER TABLE embeddings ADD COLUMN chunk_text TEXT")
+                
+                # Create indexes for high-speed performance
                 cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_documents_filename 
                     ON documents(filename)
@@ -75,33 +92,82 @@ class VectorStore:
                     CREATE INDEX IF NOT EXISTS idx_embeddings_doc_id 
                     ON embeddings(doc_id)
                 """)
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_embedding_cache_hash
+                    ON embedding_cache(text_hash)
+                """)
                 
                 conn.commit()
-                logger.info("Database initialized successfully")
+                logger.info("Database initialized and migrated successfully")
         
         except Exception as e:
             logger.error(f"Database initialization failed: {e}")
             raise
 
+    # ==================== Embedding Cache Methods ====================
+    
+    def get_cached_embedding(self, text_hash: str) -> Optional[List[float]]:
+        """Retrieve a cached embedding by SHA-256 hash."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT embedding FROM embedding_cache WHERE text_hash = ?",
+                    (text_hash,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    return json.loads(row[0])
+                return None
+        except Exception as e:
+            logger.error(f"Failed to read from embedding cache: {e}")
+            return None
+
+    def cache_embedding(self, text_hash: str, embedding: List[float]) -> None:
+        """Store an embedding in the persistent cache."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT OR REPLACE INTO embedding_cache (text_hash, embedding) VALUES (?, ?)",
+                    (text_hash, json.dumps(embedding))
+                )
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Failed to write to embedding cache: {e}")
+
+    # ==================== Document Ingestion Methods ====================
+
     def add_document(
         self,
         filename: str,
         text: str,
-        embedding: List[float],
+        embedding: Optional[List[float]] = None,
         doc_type: str = "text",
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
+        chunks: Optional[List[Tuple[str, List[float]]]] = None,
     ) -> int:
         """
         Add a document with embeddings to the store.
+        Supports both legacy unchunked documents and modernized chunk lists.
         
+        Args:
+            filename: Name of the file
+            text: Full text content
+            embedding: Single embedding for the whole document (legacy)
+            doc_type: File extension/type
+            metadata: Custom metadata dictionary
+            tags: Classification tags
+            chunks: List of tuples containing (chunk_text, chunk_embedding)
+            
         Returns: Document ID
         """
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
-                # Insert document
+                # Insert parent document metadata
                 cursor.execute("""
                     INSERT INTO documents (filename, doc_type, text, metadata, tags)
                     VALUES (?, ?, ?, ?, ?)
@@ -115,14 +181,24 @@ class VectorStore:
                 
                 doc_id = cursor.lastrowid
                 
-                # Insert embedding
-                cursor.execute("""
-                    INSERT INTO embeddings (doc_id, embedding, chunk_index)
-                    VALUES (?, ?, ?)
-                """, (doc_id, json.dumps(embedding), 0))
+                # Insert chunk-level embeddings
+                if chunks:
+                    logger.info(f"Inserting {len(chunks)} chunks for document ID: {doc_id}")
+                    for idx, (chunk_text, chunk_emb) in enumerate(chunks):
+                        cursor.execute("""
+                            INSERT INTO embeddings (doc_id, embedding, chunk_text, chunk_index)
+                            VALUES (?, ?, ?, ?)
+                        """, (doc_id, json.dumps(chunk_emb), chunk_text, idx))
+                elif embedding:
+                    # Legacy fallback: store full text as a single chunk
+                    logger.info(f"Inserting legacy single embedding for document ID: {doc_id}")
+                    cursor.execute("""
+                        INSERT INTO embeddings (doc_id, embedding, chunk_text, chunk_index)
+                        VALUES (?, ?, ?, ?)
+                    """, (doc_id, json.dumps(embedding), text, 0))
                 
                 conn.commit()
-                logger.info(f"Document added: {filename} (ID: {doc_id})")
+                logger.info(f"Document successfully written: {filename} (ID: {doc_id})")
                 return doc_id
         
         except Exception as e:
@@ -136,8 +212,6 @@ class VectorStore:
         """
         Add multiple documents in batch.
         
-        Each document dict should have: filename, text, embedding, doc_type (optional), metadata (optional), tags (optional)
-        
         Returns: List of document IDs
         """
         doc_ids = []
@@ -149,7 +223,8 @@ class VectorStore:
                     embedding=doc.get("embedding"),
                     doc_type=doc.get("doc_type", "text"),
                     metadata=doc.get("metadata"),
-                    tags=doc.get("tags")
+                    tags=doc.get("tags"),
+                    chunks=doc.get("chunks")
                 )
                 doc_ids.append(doc_id)
             
@@ -167,20 +242,19 @@ class VectorStore:
         threshold: float = 0.0
     ) -> List[Dict]:
         """
-        Perform similarity search on embeddings.
+        Perform similarity search on individual document chunks.
         
-        Returns: List of similar documents with scores
+        Returns: List of similar chunks with similarity scores and document metadata
         """
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
-                # Get all documents with embeddings
+                # Fetch chunks with their embedding vectors and document source info
                 cursor.execute("""
-                    SELECT d.id, d.filename, d.doc_type, d.text, d.metadata, e.embedding
+                    SELECT d.id, d.filename, d.doc_type, d.metadata, e.embedding, e.chunk_text, e.chunk_index
                     FROM documents d
                     JOIN embeddings e ON d.id = e.doc_id
-                    ORDER BY d.created_at DESC
                 """)
                 
                 rows = cursor.fetchall()
@@ -188,37 +262,58 @@ class VectorStore:
                 if not rows:
                     return []
                 
-                # Calculate similarity scores
                 q_emb = np.array(query_embedding, dtype=np.float32)
                 results = []
                 
                 for row in rows:
-                    doc_id, filename, doc_type, text, metadata_str, emb_str = row
-                    embedding = np.array(json.loads(emb_str), dtype=np.float32)
+                    doc_id, filename, doc_type, metadata_str, emb_str, chunk_text, chunk_index = row
                     
-                    # Cosine similarity
+                    try:
+                        embedding = np.array(json.loads(emb_str), dtype=np.float32)
+                    except Exception as parse_error:
+                        logger.warning(f"Error parsing embedding for doc {doc_id}: {parse_error}")
+                        continue
+                    
+                    # Cosine similarity calculation
                     similarity = self._cosine_similarity(q_emb, embedding)
                     
                     if similarity >= threshold:
+                        # Fallback to general text if chunk_text is null (for legacy documents)
+                        text_val = chunk_text if chunk_text is not None else ""
+                        
                         results.append({
                             "id": doc_id,
                             "filename": filename,
                             "doc_type": doc_type,
-                            "text": text,
-                            "metadata": json.loads(metadata_str or "{}"),
+                            "text": text_val,
+                            "metadata": {
+                                **json.loads(metadata_str or "{}"),
+                                "chunk_index": chunk_index
+                            },
                             "score": float(similarity)
                         })
                 
-                # Sort by score and return top_k
+                # Sort by similarity score descending
                 results.sort(key=lambda x: x["score"], reverse=True)
+                
+                # Record search in history log for metrics
+                try:
+                    cursor.execute("""
+                        INSERT INTO search_history (query, results_count, response_time_ms)
+                        VALUES (?, ?, ?)
+                    """, ("*Vector Search*", len(results[:top_k]), 0.0))
+                    conn.commit()
+                except Exception as log_error:
+                    logger.debug(f"Failed to log search history: {log_error}")
+                
                 return results[:top_k]
         
         except Exception as e:
-            logger.error(f"Search failed: {e}")
+            logger.error(f"Vector search failed: {e}")
             raise
 
     def get_document(self, doc_id: int) -> Optional[Dict]:
-        """Retrieve a specific document by ID."""
+        """Retrieve a specific document metadata and total chunk info."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -231,6 +326,10 @@ class VectorStore:
                 if not row:
                     return None
                 
+                # Calculate chunk count
+                cursor.execute("SELECT COUNT(*) FROM embeddings WHERE doc_id = ?", (doc_id,))
+                chunk_count = cursor.fetchone()[0]
+                
                 return {
                     "id": row[0],
                     "filename": row[1],
@@ -238,7 +337,8 @@ class VectorStore:
                     "text": row[3],
                     "metadata": json.loads(row[4] or "{}"),
                     "tags": json.loads(row[5] or "[]"),
-                    "created_at": row[6]
+                    "created_at": row[6],
+                    "chunk_count": max(chunk_count, 1)
                 }
         
         except Exception as e:
@@ -246,7 +346,7 @@ class VectorStore:
             raise
 
     def get_all_documents(self) -> List[Dict]:
-        """Get all documents."""
+        """Get all stored documents with accurate chunk counts."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -257,25 +357,30 @@ class VectorStore:
                 """)
                 
                 rows = cursor.fetchall()
-                return [
-                    {
-                        "id": row[0],
+                docs = []
+                for row in rows:
+                    doc_id = row[0]
+                    cursor.execute("SELECT COUNT(*) FROM embeddings WHERE doc_id = ?", (doc_id,))
+                    chunk_count = cursor.fetchone()[0]
+                    
+                    docs.append({
+                        "id": doc_id,
                         "filename": row[1],
                         "doc_type": row[2],
                         "text": row[3],
                         "metadata": json.loads(row[4] or "{}"),
                         "tags": json.loads(row[5] or "[]"),
-                        "created_at": row[6]
-                    }
-                    for row in rows
-                ]
+                        "created_at": row[6],
+                        "chunk_count": max(chunk_count, 1)
+                    })
+                return docs
         
         except Exception as e:
-            logger.error(f"Failed to get documents: {e}")
+            logger.error(f"Failed to list documents: {e}")
             raise
 
     def delete_document(self, doc_id: int) -> bool:
-        """Delete a document."""
+        """Delete a document and all corresponding chunks (via CASCADE constraints)."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -289,7 +394,7 @@ class VectorStore:
             raise
 
     def get_stats(self) -> Dict:
-        """Get storage statistics."""
+        """Get database storage statistics."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -298,7 +403,7 @@ class VectorStore:
                 cursor.execute("SELECT COUNT(*) FROM documents")
                 total_docs = cursor.fetchone()[0]
                 
-                # Total embeddings
+                # Total embeddings/chunks
                 cursor.execute("SELECT COUNT(*) FROM embeddings")
                 total_embeddings = cursor.fetchone()[0]
                 
@@ -321,7 +426,7 @@ class VectorStore:
                 }
         
         except Exception as e:
-            logger.error(f"Failed to get stats: {e}")
+            logger.error(f"Failed to get database stats: {e}")
             raise
 
     @staticmethod
