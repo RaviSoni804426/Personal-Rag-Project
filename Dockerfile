@@ -51,10 +51,6 @@ COPY --chown=appuser:appgroup backend/ ./backend/
 # Copy built frontend assets into FastAPI mount point
 COPY --from=frontend-builder --chown=appuser:appgroup /frontend/out/ ./backend/static/
 
-# Copy root configurations
-COPY --chown=appuser:appgroup README.md .
-COPY --chown=appuser:appgroup .env.example .
-
 # Create persistent storage directories with global write permissions for dynamic UIDs
 RUN mkdir -p /app/data /app/data/chroma_db /app/data/uploads /app/data/.cache && \
     chmod -R 777 /app/data
