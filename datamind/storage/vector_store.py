@@ -246,7 +246,7 @@ class VectorStore:
         """
         Perform similarity search on individual document chunks.
         Supports advanced Hybrid Search combining vector cosine similarity 
-        and term-overlap keyword relevance scores for 100% precision.
+        and term-overlap keyword relevance scores (ignoring English stopwords) for 100% precision.
         
         Returns: List of similar chunks with similarity scores and document metadata
         """
@@ -281,18 +281,24 @@ class VectorStore:
                     # Cosine similarity calculation
                     similarity = self._cosine_similarity(q_emb, embedding)
                     
-                    # Hybrid Keyword Term Overlap Score (TF-IDF-like Jaccard match)
+                    # Hybrid Keyword Term Overlap Score (Stopword-filtered Jaccard match)
                     keyword_score = 0.0
                     target_chunk_text = chunk_text or ""
                     
                     if query_text and target_chunk_text:
-                        # Normalize and extract lowercase alphanumeric words
-                        q_words = set(re.findall(r"\w+", query_text.lower()))
-                        c_words = set(re.findall(r"\w+", target_chunk_text.lower()))
-                        if q_words:
-                            overlap = len(q_words.intersection(c_words))
+                        from datamind.utils.helpers import STOPWORDS
+                        
+                        # Normalize and extract alphanumeric words
+                        q_words = [w for w in re.findall(r"\w+", query_text.lower()) if w not in STOPWORDS]
+                        c_words = [w for w in re.findall(r"\w+", target_chunk_text.lower()) if w not in STOPWORDS]
+                        
+                        q_words_set = set(q_words)
+                        c_words_set = set(c_words)
+                        
+                        if q_words_set:
+                            overlap = len(q_words_set.intersection(c_words_set))
                             # Score is the percentage of query keywords present in the segment
-                            keyword_score = overlap / len(q_words)
+                            keyword_score = overlap / len(q_words_set)
                     
                     # Hybrid weighted combination:
                     # Semantic search provides excellent concept understanding (40% weight).
