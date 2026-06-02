@@ -1,33 +1,33 @@
 version: "3.8"
 
 services:
-  datamind:
+  enterprise-rag:
     build:
       context: .
       dockerfile: Dockerfile
-    image: datamind-rag:latest
-    container_name: datamind_app
+    image: enterprise-rag-platform:latest
+    container_name: enterprise_rag_app
     ports:
-      - "8080:8080"
+      - "8000:8000"
     environment:
       - HOST=0.0.0.0
-      - PORT=8080
-      - DEBUG=false
+      - PORT=8000
+      - DEBUG=true
+      - DATABASE_URL=sqlite:////app/data/rag_platform.db
+      - CHROMA_PERSIST_DIR=/app/data/chroma_db
       - GROQ_API_KEY=${GROQ_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - DB_PATH=/app/data/datamind.db
-      - UPLOAD_DIR=/app/data/uploads
-      - LOG_FILE=/app/logs/datamind.log
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
     volumes:
-      - datamind_data:/app/data
-      - ./logs:/app/logs
+      - enterprise_rag_data:/app/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3
 
 volumes:
-  datamind_data:
+  enterprise_rag_data:
     driver: local

@@ -1,58 +1,70 @@
-# ==========================================
-# DataMind Enterprise RAG Docker Configuration
-# ==========================================
+# ========================================================
+# Enterprise Knowledge Intelligence Platform Docker Setup
+# ========================================================
 
-# --- Stage 1: Build & Dependencies ---
-FROM python:3.11-slim AS builder
+# --- Stage 1: Build Frontend Next.js Assets ---
+FROM node:18-slim AS frontend-builder
 
-WORKDIR /app
+WORKDIR /frontend
 
-# Install system utilities needed for building packages
+# Copy package descriptors first to maximize caching
+COPY frontend/package.json ./
+RUN npm install
+
+# Copy source files and compile statically
+COPY frontend/ ./
+RUN npm run build
+
+
+# --- Stage 2: Initialize Backend Dependencies ---
+FROM python:3.11-slim AS backend-builder
+
+WORKDIR /backend
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements first to optimize Docker build caching layers
-COPY requirements.txt .
+COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 
-# --- Stage 2: Final Run Image ---
+# --- Stage 3: Final Production Runner ---
 FROM python:3.11-slim AS runner
 
 WORKDIR /app
 
-# Create a non-privileged system user and group for maximum security
+# Create secure non-privileged system execution user
 RUN groupadd -g 10001 appgroup && \
     useradd -u 10001 -g appgroup -m -s /bin/bash appuser
 
-# Copy installed python dependencies from build stage
-COPY --from=builder /root/.local /home/appuser/.local
+# Copy Python packages from builder stage
+COPY --from=backend-builder /root/.local /home/appuser/.local
 ENV PATH=/home/appuser/.local/bin:$PATH
+ENV PYTHONPATH=/app
 
-# Copy application source code
-COPY --chown=appuser:appgroup datamind/ ./datamind/
+# Copy backend files
+COPY --chown=appuser:appgroup backend/ ./backend/
+
+# Copy built frontend assets into FastAPI mount point
+COPY --from=frontend-builder --chown=appuser:appgroup /frontend/out/ ./backend/static/
+
+# Copy root configurations
 COPY --chown=appuser:appgroup README.md .
 COPY --chown=appuser:appgroup .env.example .
 
-# Create writable data directories for SQLite db and file uploads
-RUN mkdir -p /app/data /app/logs && \
-    chown -R appuser:appgroup /app/data /app/logs
+# Create persistent storage directories
+RUN mkdir -p /app/data /app/data/chroma_db /app/data/uploads && \
+    chown -R appuser:appgroup /app/data
 
-# Switch container execution context to non-root user
 USER appuser
 
-# Configure runtime environments
+# Expose single serving port
+EXPOSE 8000
+
 ENV HOST=0.0.0.0
-ENV PORT=8080
-ENV DB_PATH=/app/data/datamind.db
-ENV UPLOAD_DIR=/app/data/uploads
-ENV LOG_FILE=/app/logs/datamind.log
-ENV DEBUG=false
+ENV PORT=8000
+ENV DATABASE_URL=sqlite:////app/data/rag_platform.db
+ENV CHROMA_PERSIST_DIR=/app/data/chroma_db
 
-# Expose ports
-EXPOSE 8080
-EXPOSE 7860
-
-# Run FastAPI app with uvicorn. sh -c evaluates ${PORT} dynamically at runtime (highly recommended for Hugging Face Spaces port 7860)
-CMD ["sh", "-c", "uvicorn datamind.main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 2"]
+# Run FastAPI app
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

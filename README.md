@@ -1,236 +1,154 @@
----
-title: DataMind
-emoji: "🧠"
-colorFrom: "blue"
-colorTo: "indigo"
-sdk: docker
-pinned: false
----
+# Enterprise Knowledge Intelligence Platform
 
-# 🧠 DataMind - Enterprise Document Intelligence & RAG Platform
+A state-of-the-art, production-ready Retrieval-Augmented Generation (RAG) platform designed to ingest, segment, index, search, and synthesize enterprise document repositories. 
 
-> **A production-ready, highly optimized Retrieval-Augmented Generation (RAG) platform** designed to ingest, process, chunk, and index enterprise document repositories for real-time semantic search and conversational AI synthesis.
-
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg?style=for-the-badge&logo=python)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![SQLite](https://img.shields.io/badge/SQLite-3.x-003B57.svg?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
-[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?style=for-the-badge&logo=docker)](https://www.docker.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+Designed on **Clean Architecture SOLID principles**, this platform couples a high-speed Python FastAPI backend with a beautiful Next.js + TypeScript + Tailwind CSS analytics dashboard.
 
 ---
 
-## 🎯 Architecture & Data Flow
+## 🏗️ Architectural Topology
 
-DataMind is built strictly following **SOLID principles** and a modular clean architecture that guarantees decoupling between API routers, business logic pipelines, vector store databases, and embedding cache layers.
-
-### System Architecture Topology
+The system separates concerns across specialized components to ensure complete reliability, modular testability, and frictionless plug-and-play extensions:
 
 ```mermaid
 graph TD
-    UI[Client UI / Dashboard] -->|REST APIs / JSON| API[FastAPI Entry Router - main.py]
+    Client[Next.js + TypeScript Dashboard UI] <-->|JSON / Stream API| FastAPI[FastAPI Backend]
     
-    subgraph FastAPI Web Services [api/]
-        API --> DR[Documents Router]
-        API --> CR[Chat Router]
-        API --> HR[Health Router]
-    end
-
-    subgraph Core Business Services [services/]
-        DR & CR --> DS[Document Service - document_service.py]
-    end
-
-    subgraph Core NLP & ML Core [core/]
-        DS --> ES[Embeddings Service - embeddings.py]
-        DS --> LS[LLM Service - llm.py]
-        ES -->|Checks Cache| EC[SQLite Embedding Cache]
-        ES -->|Batch HTTP| GAPI[Groq API]
-        LS -->|HTTP Failover| OAPI[OpenAI / Groq API]
-    end
-
-    subgraph Storage Layer [storage/]
-        DS --> VS[Vector Store - vector_store.py]
-        VS -->|SQLite Transactions| DB[(SQLite Database)]
-    end
+    %% Ingestion & Chunking
+    FastAPI -->|1. Ingest| Loaders[Document Ingestion Loaders]
+    Loaders -->|Raw Text + Metadata| Chunkers[Advanced Chunking Engine]
     
-    style UI fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style API fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style DS fill:#faf5ff,stroke:#7c3aed,stroke-width:2px
-    style DB fill:#fff7ed,stroke:#ea580c,stroke-width:2px
-    style EC fill:#fef2f2,stroke:#dc2626,stroke-width:2px
-```
-
-### End-to-End Pipeline Execution
-
-1. **Ingest & Clean**: Multi-format files (PDF, DOCX, TXT, MD, CSV, JSON) are parsed and converted to raw text.
-2. **Semantic Chunking**: A recursive character chunker divides text into overlapping segments of **500 characters (100 overlap)** to retain semantic boundaries.
-3. **Transparent Embedding Cache**: Text segments are hashed using **SHA-256**. The cache table is queried; if hit, vectors are resolved in **0.1ms** locally. If missed, they are batch-submitted to Groq APIs and written to the cache database.
-4. **Vector Persistence**: Document descriptors and segment embeddings are written to SQLite using native transactional parameters and cascade constraints.
-5. **Dense Context retrieval**: Queries are embedded and compared against stored segments using **NumPy-optimized cosine similarity** in-memory.
-6. **LLM Synthesis (RAG)**: The top-K dense matching segments are merged with file citations and chunk indices to construct high-context prompts. OpenAI/Groq synthesizes a highly accurate response.
-
----
-
-## ✨ Production-Ready Features
-
-*   🚀 **High-Speed SQLite Vector Store**: Full schema support for segments and caches, with database indexes for rapid search.
-*   ⚡ **Persistent Embedding Caching**: Saves up to **90% of API token quotas** and delivers sub-millisecond local response times for repetitive chunk uploads.
-*   🧠 **Overlapping Chunking**: High-density indexing segments keep context window sizes lightweight and accurate.
-*   🎯 **Robust LLM Failover**: Dynamic failover from OpenAI (`gpt-4o-mini`) to Groq (`llama-3.1-8b-instant`), with degraded direct context fragment returns if all APIs fail.
-*   🎨 **Stunning SaaS Dashboard UI**: Revamped using `Outfit` + `Inter` typography, glassmorphism card layouts, linear hover border glows, dynamic metrics dashboards, and responsive flexboxes.
-*   🐳 **Container DevOps Suite**: Multi-stage, non-root `Dockerfile` configurations with persistent Docker Compose mounts.
-*   🧪 **Complete Automated Pytest Suite**: Testing coverage spanning database CRUDs, segment searches, cache resolution, fallbacks, and FastAPI TestClients.
-
----
-
-## 📁 explainable Folder Structure
-
-```
-datamind/                           # Main application package
-├── api/                            # REST API routing
-│   ├── chat.py                    # AI conversational synthetics
-│   ├── documents.py               # Ingestion upload & search endpoints
-│   ├── health.py                  # Live, ready, and health monitors
-│   └── __init__.py
-├── config/
-│   ├── settings.py                # Centralized Pydantic-like settings manager
-│   └── __init__.py
-├── core/                           # Embeddings and LLM NLP layers
-│   ├── embeddings.py              # Embedding caching & fallback calculations
-│   ├── llm.py                     # OpenAI & Groq robust synthesis services
-│   └── __init__.py
-├── models/
-│   ├── schemas.py                 # Pydantic schema validation structures
-│   └── __init__.py
-├── services/
-│   ├── document_service.py        # Core RAG pipeline orchestrator
-│   └── __init__.py
-├── static/                         # Premium Visuals UI (HTML/CSS/JS)
-│   ├── app.js
-│   ├── index.html
-│   └── style.css
-├── storage/
-│   ├── vector_store.py            # SQLite schemas and custom cosine searches
-│   └── __init__.py
-├── utils/
-│   ├── helpers.py                 # File parsers and character chunking
-│   ├── logging.py                 # Structured logs outputs
-│   └── __init__.py
-├── main.py                        # FastAPI startup coordinator & lifespan
-└── __init__.py
-
-tests/                              # Pytest Automated Test Suite
-├── conftest.py                    # Clean testing setups, mocks, and fixtures
-├── test_api.py                    # REST router integration tests
-├── test_core.py                   # Cache and local models tests
-└── test_storage.py                # Database schemas & retrieval logic
+    %% Vector Storage & Cache
+    Chunkers -->|2. Vectorize| Embedder[SentenceTransformer Embedder]
+    Embedder <-->|Hash Cache Hit/Miss| DbCache[(SQLite/Postgres Cache)]
+    Embedder -->|3. Store Vectors| Chroma[(ChromaDB Vector Store)]
+    
+    %% Hybrid Retrieval & Rerank
+    FastAPI -->|4. Search| HybridSearch[Hybrid Dense + Sparse Retriever]
+    Chroma -->|Dense Match| HybridSearch
+    BM25[BM25 Index] -->|Sparse Match| HybridSearch
+    HybridSearch -->|RRF Fusion| Reranker[Cross-Encoder Reranker]
+    Reranker -->|Top Chunks| ContextCompressor[Context Compressor]
+    
+    %% LLM Synthesizer
+    ContextCompressor -->|Dense Chunks| Synthesizer[Groq Synthesis Engine]
+    Synthesizer <-->|Session Context| Memory[Conversational Memory]
+    Synthesizer -->|5. Grounded Answer| FastAPI
+    
+    %% Evaluation & Monitoring
+    FastAPI -->|Async Trace| Observability[Observability & Eval Suite]
+    Observability -->|Log Metrics| MetricsDb[(PostgreSQL/SQLite Metrics)]
 ```
 
 ---
 
-## 🛠️ Installation & Setup (5 Minutes)
+## 🌟 Core Strategic Capabilities
 
-### 1. Configure Environment Variables
-Copy the configuration template and populate your API credentials:
+### 1. Unified Multi-Format Loaders (`backend/ingestion/`)
+Distinct adapters ingest and parse raw textual data from:
+- **PDF**: Employs structural layouts, table parsers (`pdfplumber`), and rapid text fallbacks (`PyPDF2`).
+- **Word (.docx)**: Extracts standard body text alongside nested tables and core doc properties.
+- **CSV & Excel**: Transforms records and spreadsheets into clean semantic JSON key-value templates.
+- **Markdown & HTML**: Cleans code formatting and strips DOM nodes while mapping document outline tags.
+- Includes automatic metadata generation (page count, title, file size) and vocabulary language heuristics.
+
+### 2. Advanced Chunking Engine (`backend/chunking/`)
+- **Recursive Character Split**: Splits on syntax delimiters (paragraphs, sentences, words) dynamically.
+- **Semantic Similarity Chunker**: Measures sentence embeddings cosine distances and splits when similarity dips.
+- **Parent-Child Hierarchy**: Maps small, highly focused sub-paragraphs (child chunks) for high-fidelity vector matching, but feeds their broader containing blocks (parent chunks) to the LLM. This provides high vector precision alongside excellent context depth.
+
+### 3. High-Performance Retrieval Pipeline (`backend/retrieval/` & `backend/reranking/`)
+- **Dual Hybrid Search**: Merges vector cosine similarity search (dense semantic) with BM25 term matching (sparse keywords) utilizing **Reciprocal Rank Fusion (RRF)**:
+  $$RRF(d) = \sum_{m \in M} \frac{1}{60 + r_m(d)}$$
+- **Deep Cross-Encoder Rerank**: Loads the `cross-encoder/ms-marco-MiniLM-L-6-v2` transformer to score and filter retrieved chunks.
+- **SQL-Backed Vector Cache**: Persistent SHA-256 caching saves local or network vector calculations, enabling sub-millisecond lookups for repeated uploads.
+
+### 4. Grounded Synthesis & Memory (`backend/generation/`)
+- **Groq Llama 3.3 / DeepSeek**: Guided system prompts demand exact citations (e.g. `[source: manual.pdf]`), source quotes, and output validation metrics.
+- **Strict Hallucination Guards**: If retrieved documents fail to address the question, the system outputs exactly: `"I could not find sufficient information in the uploaded documents."` and avoids extrapolation.
+- **Conversational Session Memory**: Automatically compiles message histories and truncates old threads to preserve token limits.
+
+### 5. Automated Evaluation Module (`backend/evaluation/`)
+- **Retrieval Performance**: Logs **Precision@K**, **Recall@K**, and **Mean Reciprocal Rank (MRR)**.
+- **Generative Integrity (LLM-in-the-loop)**:
+  - **Faithfulness**: Percent of generated assertions found directly in retrieved sources.
+  - **Context Precision**: Ratio of relevant retrieved documents in top ranks.
+  - **Answer Relevance**: Semantic similarity between query and response.
+
+---
+
+## 📂 System Project Structure
+
+```text
+├── backend/
+│   ├── api/             # FastAPI routers and Pydantic validators
+│   ├── core/            # High-level RAG orchestration
+│   ├── services/        # Document uploads and chat pipelines
+│   ├── ingestion/       # Extraction adapters (PDF, Word, CSV, HTML, MD)
+│   ├── chunking/        # Advanced character, semantic, and parent-child strategies
+│   ├── embeddings/      # Embeddings wrapping and persistent SQL cache
+│   ├── retrieval/       # BM25 + dense search and RRF fusion
+│   ├── reranking/       # Cross-Encoder MiniLM reranking
+│   ├── generation/      # Groq synthesis and memory management
+│   ├── evaluation/      # Precision@K, Recall, Faithfulness evaluators
+│   ├── monitoring/      # System logs and LangSmith tracers
+│   ├── database/        # SQLAlchemy schemas and database connections
+│   ├── tests/           # Full pytest automation suite
+│   ├── config/          # Pydantic-settings configuration
+│   └── main.py          # FastAPI server entry point
+├── frontend/
+│   ├── components/      # ChatInterface, Sidebar, DocumentManager, Analytics
+│   ├── pages/           # Next.js pages layouts
+│   ├── services/        # Fetch endpoints mapping backend API
+│   ├── next.config.js   # Static export setups
+│   ├── package.json     # Node modules descriptors
+│   └── tailwind.config.js # Custom dark-mode theme configurations
+├── Dockerfile           # Multi-stage unified container setup
+├── docker-compose.yml   # Multi-container local orchestration
+└── README.md            # Comprehensive documentation
+```
+
+---
+
+## ⚡ Quick Start Guide
+
+### Option A: Running via Docker (Recommended)
+Configure your API keys inside `.env` in the root:
 ```bash
-cp .env.example .env
-```
-Edit `.env`:
-```ini
-GROQ_API_KEY=gsk_your_key_here
-OPENAI_API_KEY=sk_your_key_here
+GROQ_API_KEY=gsk_...
+OPENAI_API_KEY=sk_...
 ```
 
-### 2. Local Setup
-Create a virtual environment and install packages:
+Start the entire platform serving both API and frontend on port `8000`:
 ```bash
+docker-compose up --build
+```
+Access the dashboard at `http://localhost:8000/`.
+
+### Option B: Local Manual Setup
+
+#### 1. Start the FastAPI Backend
+```bash
+cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
+python main.py
 ```
+API docs will load at `http://localhost:8000/docs`.
 
-### 3. Launch App
-Start the FastAPI server:
+#### 2. Start the Next.js Frontend
 ```bash
-uvicorn datamind.main:app --host 0.0.0.0 --port 8080 --reload
+cd frontend
+npm install
+npm run dev
 ```
-Open your browser and navigate to `http://localhost:8080`.
+Open `http://localhost:3000/` in your browser.
 
 ---
 
-## 🐳 Docker Deployment & Compose
-
-### Docker Compose (Recommended)
-Launch the platform with isolated compose mounts:
+## 🧪 Testing and Verification
+Run the Pytest suite to verify the ingestion loaders, caching networks, hybrid retrievers, rerankers, and RAG evaluation engines:
 ```bash
-docker-compose up --build -d
+pytest backend/tests/
 ```
-Access the server at `http://localhost:8080`.
-
-### Manual Docker Run
-Build and run the container securely:
-```bash
-docker build -t datamind-rag:latest .
-docker run -d -p 8080:8080 \
-  -e GROQ_API_KEY="gsk_your_key" \
-  -e OPENAI_API_KEY="sk_your_key" \
-  -v datamind_vol:/app/data \
-  datamind-rag:latest
-```
-
----
-
-## 🧪 Automated Testing
-
-We maintain a comprehensive suite of unit and integration test cases that verify core business pipelines completely.
-
-Run all tests:
-```bash
-pytest -v
-```
-
-Tests details:
-*   `tests/test_storage.py`: Validates database schemas, cascades, index queries, and local cosine similarities.
-*   `tests/test_core.py`: Validates SHA-256 caching efficiency, local fallbacks, and LLM failovers.
-*   `tests/test_api.py`: Validates endpoints payloads, upload Multi-parts, and JSON schemas.
-
----
-
-## 📖 API Documentation Catalogue
-
-DataMind includes auto-generated interactive documentations accessible at:
-- **Swagger UI**: `/api/docs`
-- **ReDoc UI**: `/api/redoc`
-
-### Route Catalog
-
-| Method | Endpoint | Description | Request Payload Schema | Response Format |
-| :--- | :--- | :--- | :--- | :--- |
-| **GET** | `/api/health/` | System status and service checks | *None* | `HealthResponse` JSON |
-| **POST** | `/api/documents/upload` | Ingest multiple files (Multipart) | `files: UploadFile` | `DocumentInfo` JSON |
-| **POST** | `/api/documents/search` | Semantic search index segments | `SearchRequest` JSON | `SearchResponse` JSON |
-| **GET** | `/api/documents/` | Get list of indexed documents | *None* | `List[DocumentInfo]` |
-| **DELETE** | `/api/documents/{id}` | Purge document and all vector chunks | *None* | `{"message": "Success"}` |
-| **POST** | `/api/chat/` | Ask conversational question | `ConversationMessage` JSON | `ConversationResponse` JSON |
-| **GET** | `/api/documents/stats` | Stored metrics and analytics statistics | *None* | `DocumentStats` JSON |
-
----
-
-## 🚀 Hugging Face Deployment
-
-Deploy this platform directly to Hugging Face Spaces with Docker in seconds:
-
-1. Create a new Space on Hugging Face.
-2. Select **Docker** as the SDK (with Blank template).
-3. Connect your Git repository or push this repository directly to Hugging Face.
-4. Add `GROQ_API_KEY` and `OPENAI_API_KEY` inside your Space **Variables and secrets** panel.
-5. Hugging Face will automatically run a multi-stage Docker build, expose the container on port `7860`, and host your professional DataMind dashboard online!
-
----
-
-## 🔮 Future Architecture Roadmap
-
-To scale this project for massive enterprise use cases:
-1. **Dynamic Chunking**: Use Semantic Splitting (chunking by sentence semantic shifts rather than strict character counts).
-2. **Pinecone/Weaviate Swapping**: Implement a Repository Pattern switch to store billions of vectors in cloud-scale vector databases.
-3. **Advanced RAG Patterns**: Implement query rewriting, HyDE (Hypothetical Document Embeddings), and cross-encoder re-ranking.
-4. **OAuth2 Security**: Add role-based authentication layers to protect private corporate indexes.
