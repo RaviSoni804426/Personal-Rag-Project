@@ -4,7 +4,6 @@ Supports OpenAI with Groq fallback.
 """
 
 from typing import Optional, List
-
 import requests
 
 from datamind.config import settings
@@ -75,7 +74,7 @@ class LLMService:
                         "model": model,
                         "messages": messages,
                         "max_tokens": settings.MAX_TOKENS,
-                        "temperature": 0.7,
+                        "temperature": 0.3, # Reduced temperature to 0.3 for highly reliable, non-hallucinatory Q&A
                     },
                     headers={
                         "Authorization": f"Bearer {api_key}",
@@ -110,9 +109,13 @@ class LLMService:
     @staticmethod
     def _default_system_prompt() -> str:
         return (
-            "You are DataMind, an intelligent document analysis assistant. "
-            "Provide concise, accurate answers based only on the supplied context. "
-            "If the answer is not in the context, say so clearly."
+            "You are DataMind, an elite document intelligence and conversational AI assistant.\n"
+            "Your task is to analyze the provided context blocks and synthesize a highly accurate, structured, and comprehensive answer to the user's question.\n\n"
+            "Guidelines:\n"
+            "1. Structure your response using markdown with clean headings, bold text, bullet points, or tables where appropriate.\n"
+            "2. Ground every claim strictly in the provided context blocks. Cite the source files (e.g. [filename.pdf]) when presenting information from them.\n"
+            "3. If the context does not contain the answer, do not make up facts. Instead, synthesize what is available in the context that is closest to the query, and clearly state what additional details are missing.\n"
+            "4. Be helpful, professional, and thorough."
         )
 
     @staticmethod

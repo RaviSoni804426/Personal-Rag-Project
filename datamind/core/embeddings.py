@@ -1,6 +1,6 @@
 """
 Embeddings service for generating vector representations.
-Integrates with Groq API when available, caches embeddings in SQLite for speed/cost,
+Integrates with OpenAI API when available, caches embeddings in SQLite for speed/cost,
 and falls back to a local deterministic embedding model for offline development.
 """
 
@@ -30,11 +30,14 @@ class EmbeddingsService:
         model: Optional[str] = None
     ):
         """Initialize embeddings service."""
-        self.api_key = api_key or settings.GROQ_API_KEY
-        self.api_url = api_url or settings.GROQ_EMBEDDING_URL
-        self.model = model or settings.EMBEDDING_MODEL
+        # Use OpenAI as primary embeddings provider since Groq doesn't host embeddings
+        self.openai_key = api_key or settings.OPENAI_API_KEY
+        self.openai_url = api_url or "https://api.openai.com/v1/embeddings"
+        self.openai_model = model or "text-embedding-3-small"
         self.timeout = settings.REQUEST_TIMEOUT
-        self.local_mode = not bool(self.api_key)
+        
+        # Local mode active if no key is configured
+        self.local_mode = not bool(self.openai_key)
 
         # Ensure database directory exists for the cache
         if settings.DB_PATH:
@@ -42,10 +45,10 @@ class EmbeddingsService:
 
         if self.local_mode:
             logger.warning(
-                "GROQ_API_KEY not configured, using local fallback embeddings"
+                "OPENAI_API_KEY not configured, using local fallback embeddings"
             )
         else:
-            logger.info(f"EmbeddingsService initialized with model: {self.model}")
+            logger.info(f"EmbeddingsService initialized with OpenAI model: {self.openai_model}")
 
     def _get_cached_embedding(self, text_hash: str) -> Optional[List[float]]:
         """Query persistent SQLite cache for pre-computed vector."""
@@ -69,7 +72,6 @@ class EmbeddingsService:
         try:
             with sqlite3.connect(settings.DB_PATH) as conn:
                 cursor = conn.cursor()
-                # Create table if missing just in case
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS embedding_cache (
                         text_hash TEXT PRIMARY KEY,
@@ -161,7 +163,6 @@ class EmbeddingsService:
         tokens = re.findall(r"[A-Za-z0-9_]+", text.lower())
 
         if not tokens:
-            # Add a small uniform noise if text is completely empty to prevent zero vectors
             return (np.ones(dimension, dtype=np.float32) / np.sqrt(dimension)).tolist()
 
         for token in tokens:
@@ -176,19 +177,19 @@ class EmbeddingsService:
         return vector.tolist()
 
     def _embed_batch(self, texts: List[str]) -> List[List[float]]:
-        """Send a batch of texts to Groq API."""
+        """Send a batch of texts to OpenAI API."""
         try:
             payload = {
-                "model": self.model,
+                "model": self.openai_model,
                 "input": texts
             }
             headers = {
-                "Authorization": f"Bearer {self.api_key}",
+                "Authorization": f"Bearer {self.openai_key}",
                 "Content-Type": "application/json"
             }
             
             response = requests.post(
-                self.api_url,
+                self.openai_url,
                 json=payload,
                 headers=headers,
                 timeout=self.timeout
@@ -206,7 +207,7 @@ class EmbeddingsService:
             return embeddings
         
         except requests.exceptions.RequestException as e:
-            logger.error(f"Groq API request failed: {e}")
+            logger.error(f"OpenAI API embedding request failed: {e}")
             raise RuntimeError(f"Embeddings generation failed: {e}") from e
         
         except Exception as e:

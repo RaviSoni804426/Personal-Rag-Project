@@ -21,7 +21,7 @@ const sectionHeaders = {
         subtitle: "Synthesize insights and ask deep questions across indexed documents"
     },
     search: {
-        title: "Semantic vector Search",
+        title: "Semantic Vector Search",
         subtitle: "Locate matching document segments using natural language cosine similarity"
     },
     documents: {
@@ -216,6 +216,62 @@ function formatBytes(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
+// Lightweight secure Markdown Parser for dynamic RAG outputs
+function parseMarkdown(text) {
+    if (!text) return "";
+    let html = text;
+    
+    // Escape HTML tag tags to prevent basic XSS
+    html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    
+    // Replace blockquotes
+    html = html.replace(/^&gt;\s+(.*)$/gim, '<blockquote>$1</blockquote>');
+    
+    // Replace headers
+    html = html.replace(/^###\s+(.*)$/gim, '<h3 style="margin-top:0.75rem; margin-bottom:0.25rem; font-family:\'Outfit\',sans-serif; font-weight:700;">$1</h3>');
+    html = html.replace(/^##\s+(.*)$/gim, '<h2 style="margin-top:1rem; margin-bottom:0.35rem; font-family:\'Outfit\',sans-serif; font-weight:700;">$1</h2>');
+    html = html.replace(/^#\s+(.*)$/gim, '<h1 style="margin-top:1.25rem; margin-bottom:0.5rem; font-family:\'Outfit\',sans-serif; font-weight:800;">$1</h1>');
+    
+    // Replace bold text tags
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:700;">$1</strong>');
+    
+    // Replace italic text tags
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Replace code segments
+    html = html.replace(/`(.*?)`/g, '<code style="background-color:rgba(0,0,0,0.05); padding:0.1rem 0.35rem; border-radius:3px; font-family:monospace; font-size:0.9em;">$1</code>');
+    
+    // Process markdown lists
+    let lines = html.split('\n');
+    let inList = false;
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (line.startsWith("* ") || line.startsWith("- ")) {
+            let contentText = line.substring(2);
+            if (!inList) {
+                lines[i] = '<ul style="margin-left:1.25rem; margin-top:0.35rem; margin-bottom:0.35rem; list-style-type:disc;"><li>' + contentText + '</li>';
+                inList = true;
+            } else {
+                lines[i] = '<li>' + contentText + '</li>';
+            }
+        } else {
+            if (inList) {
+                lines[i] = '</ul>' + lines[i];
+                inList = false;
+            }
+        }
+    }
+    if (inList) {
+        lines.push('</ul>');
+    }
+    html = lines.join('\n');
+    
+    // Replace newlines with html line breaks
+    html = html.replace(/\n/g, '<br>');
+    
+    return html;
+}
+
 function formatDate(dateString) {
     if (!dateString) return 'Unknown';
     try {
@@ -329,7 +385,7 @@ async function executeChatQuery() {
             body: JSON.stringify({
                 message: textQuery,
                 top_k: state.topK,
-                system_prompt: "You are DataMind, an intelligent document analysis assistant. Synthesize answers based on provided documents."
+                system_prompt: "You are DataMind, an elite document intelligence and conversational AI assistant. Analyze context blocks and synthesize structured answers."
             })
         });
         
@@ -374,9 +430,15 @@ function appendBubbleMessage(role, text, retrievedContext = null) {
     const content = document.createElement('div');
     content.className = 'bubble-content';
     
-    // Clean string replacements or markdown conversions
-    const parsedText = text.replace(/\n/g, '<br>');
-    content.innerHTML = `<p>${parsedText}</p>`;
+    // Safe HTML rendering for assistant using markdown parser, plain text textContent for user
+    if (role === 'assistant') {
+        content.innerHTML = parseMarkdown(text);
+    } else if (role === 'user') {
+        content.textContent = text;
+        content.style.whiteSpace = 'pre-wrap';
+    } else {
+        content.textContent = text;
+    }
     
     // Add citation metadata tags for AI bubbles if search segments hits exist
     if (role === 'assistant' && retrievedContext && retrievedContext.length > 0) {

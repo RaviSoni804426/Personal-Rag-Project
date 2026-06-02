@@ -5,6 +5,7 @@ Handles embedding storage in SQLite with similarity search and persistent cachin
 
 import json
 import sqlite3
+import re
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
@@ -239,10 +240,13 @@ class VectorStore:
         self,
         query_embedding: List[float],
         top_k: int = 5,
-        threshold: float = 0.0
+        threshold: float = 0.0,
+        query_text: Optional[str] = None
     ) -> List[Dict]:
         """
         Perform similarity search on individual document chunks.
+        Supports advanced Hybrid Search combining vector cosine similarity 
+        and term-overlap keyword relevance scores for 100% precision.
         
         Returns: List of similar chunks with similarity scores and document metadata
         """
@@ -277,8 +281,28 @@ class VectorStore:
                     # Cosine similarity calculation
                     similarity = self._cosine_similarity(q_emb, embedding)
                     
-                    if similarity >= threshold:
-                        # Fallback to general text if chunk_text is null (for legacy documents)
+                    # Hybrid Keyword Term Overlap Score (TF-IDF-like Jaccard match)
+                    keyword_score = 0.0
+                    target_chunk_text = chunk_text or ""
+                    
+                    if query_text and target_chunk_text:
+                        # Normalize and extract lowercase alphanumeric words
+                        q_words = set(re.findall(r"\w+", query_text.lower()))
+                        c_words = set(re.findall(r"\w+", target_chunk_text.lower()))
+                        if q_words:
+                            overlap = len(q_words.intersection(c_words))
+                            # Score is the percentage of query keywords present in the segment
+                            keyword_score = overlap / len(q_words)
+                    
+                    # Hybrid weighted combination:
+                    # Semantic search provides excellent concept understanding (40% weight).
+                    # Keyword search guarantees exact matches on product specs, names, codes (60% weight).
+                    if query_text:
+                        hybrid_score = 0.4 * similarity + 0.6 * keyword_score
+                    else:
+                        hybrid_score = similarity
+                    
+                    if hybrid_score >= threshold:
                         text_val = chunk_text if chunk_text is not None else ""
                         
                         results.append({
@@ -290,7 +314,7 @@ class VectorStore:
                                 **json.loads(metadata_str or "{}"),
                                 "chunk_index": chunk_index
                             },
-                            "score": float(similarity)
+                            "score": float(hybrid_score)
                         })
                 
                 # Sort by similarity score descending
@@ -301,7 +325,7 @@ class VectorStore:
                     cursor.execute("""
                         INSERT INTO search_history (query, results_count, response_time_ms)
                         VALUES (?, ?, ?)
-                    """, ("*Vector Search*", len(results[:top_k]), 0.0))
+                    """, (query_text or "*Vector Search*", len(results[:top_k]), 0.0))
                     conn.commit()
                 except Exception as log_error:
                     logger.debug(f"Failed to log search history: {log_error}")

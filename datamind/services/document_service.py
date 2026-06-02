@@ -164,17 +164,17 @@ class DocumentService:
             # Generate vector representation for the search query (hits cache if identical to prior query)
             query_embedding = self.embeddings.embed_text(query)
             
-            # Perform similarity search across individual stored segments
+            # Perform Hybrid search combining cosine similarity and term overlaps
             results = self.vector_store.search(
                 query_embedding=query_embedding,
                 top_k=top_k,
-                threshold=threshold
+                threshold=threshold,
+                query_text=query
             )
             
             # Convert DB matches to schema SearchResult models
             search_results = []
             for result in results:
-                # Truncate clean excerpt for visual representations
                 clean_text = result["text"]
                 excerpt = clean_text[:200] + "..." if len(clean_text) > 200 else clean_text
                 
