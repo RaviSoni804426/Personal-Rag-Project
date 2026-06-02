@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = Field(default="", validation_alias="OPENAI_API_KEY")
     
     # Databases
-    DATABASE_URL: str = Field(default="sqlite:///./rag_platform.db", validation_alias="DATABASE_URL")
+    DATABASE_URL: str = Field(default="sqlite:///./data/rag_platform.db", validation_alias="DATABASE_URL")
     CHROMA_PERSIST_DIR: str = Field(default="./data/chroma_db", validation_alias="CHROMA_PERSIST_DIR")
     
     # Models Configuration
-    EMBEDDING_MODEL: str = Field(default="BAAI/bge-large-en-v1.5", validation_alias="EMBEDDING_MODEL")
+    EMBEDDING_MODEL: str = Field(default="BAAI/bge-small-en-v1.5", validation_alias="EMBEDDING_MODEL")
     RERANKER_MODEL: str = Field(default="cross-encoder/ms-marco-MiniLM-L-6-v2", validation_alias="RERANKER_MODEL")
     
     # LLM Settings

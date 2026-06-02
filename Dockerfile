@@ -59,12 +59,12 @@ RUN mkdir -p /app/data /app/data/chroma_db /app/data/uploads && \
 USER appuser
 
 # Expose single serving port
-EXPOSE 8000
+EXPOSE 7860
 
 ENV HOST=0.0.0.0
-ENV PORT=8000
+ENV PORT=7860
 ENV DATABASE_URL=sqlite:////app/data/rag_platform.db
 ENV CHROMA_PERSIST_DIR=/app/data/chroma_db
 
 # Run FastAPI app
-CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
