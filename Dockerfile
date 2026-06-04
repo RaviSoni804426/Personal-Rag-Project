@@ -7,6 +7,10 @@ FROM node:18-slim AS frontend-builder
 
 WORKDIR /frontend
 
+# Limit memory usage for Node compiler to prevent OOM build crashes
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV NEXT_TELEMETRY_DISABLED=1
+
 # Copy package descriptors first to maximize caching
 COPY frontend/package.json ./
 RUN npm install
@@ -27,6 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Create isolated virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -40,9 +48,9 @@ WORKDIR /app
 RUN groupadd -g 10001 appgroup && \
     useradd -u 10001 -g appgroup -m -s /bin/bash appuser
 
-# Copy Python packages from builder stage globally
-COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=backend-builder /usr/local/bin /usr/local/bin
+# Copy virtual environment from builder stage
+COPY --from=backend-builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
 # Copy backend files
